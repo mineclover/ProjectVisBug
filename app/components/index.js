@@ -13,3 +13,5 @@ export { Metatip }    from './metatip/metatip.element'
 export { Ally }       from './metatip/ally.element'
 
 export { Hotkeys }    from './hotkey-map/hotkeys.element'
+
+export { EditLogPanel } from './edit-log-panel/edit-log-panel.element.js'
