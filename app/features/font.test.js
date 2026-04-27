@@ -84,16 +84,21 @@ test('Can change letter space', async ({ visbugPage }) => {
 test('Can change weight', async ({ visbugPage }) => {
   const key = await metaKey(visbugPage)
 
+  // Set deterministic baseline (avoids user-agent stylesheet differences
+  // between headless/headful chromium that affect <b>'s computed weight)
+  await visbugPage.evaluate(() => {
+    document.querySelector('[intro] b').style.fontWeight = '400'
+  })
   await visbugPage.click(test_selector)
-  expect(await getInlineStyle(visbugPage, 'font-weight')).toBe('')
+  expect(await getInlineStyle(visbugPage, 'font-weight')).toBe('400')
 
   await visbugPage.keyboard.down(key)
   await visbugPage.keyboard.press('ArrowUp')
   await visbugPage.keyboard.up(key)
-  expect(await getInlineStyle(visbugPage, 'font-weight')).toBe('800')
+  expect(await getInlineStyle(visbugPage, 'font-weight')).toBe('500')
 
   await visbugPage.keyboard.down(key)
   await visbugPage.keyboard.press('ArrowDown')
   await visbugPage.keyboard.up(key)
-  expect(await getInlineStyle(visbugPage, 'font-weight')).toBe('700')
+  expect(await getInlineStyle(visbugPage, 'font-weight')).toBe('400')
 })
