@@ -1,33 +1,36 @@
-import puppeteer from 'puppeteer'
+import { test as base, expect } from '@playwright/test'
 
-export const setupPptrTab = async t => {
-  t.context.browser  = await puppeteer.launch({
-    // headless: false,
-    args: ['--no-sandbox']
-  })
-  t.context.page     = await t.context.browser.newPage()
+/**
+ * @typedef {Object} VisBugFixtures
+ * @property {import('@playwright/test').Page} visbugPage
+ */
 
-  await t.context.page.goto('http://localhost:3000')
-  await t.context.page.evaluateHandle(`document.body.setAttribute('testing', true)`)
-  await t.context.page.waitForSelector('vis-bug')
+/** @type {ReturnType<typeof base.extend<VisBugFixtures>>} */
+export const test = base.extend({
+  visbugPage: async ({ page }, use) => {
+    await page.goto('/')
+    await page.evaluate(() => document.body.setAttribute('testing', 'true'))
+    await page.waitForSelector('vis-bug')
+    await use(page)
+  },
+})
+
+export { expect }
+
+export const changeMode = async ({ page, tool }) => {
+  await page.evaluate((toolName) => {
+    const visbug = document.querySelector('vis-bug')
+    const li = visbug.$shadow.querySelector(`li[data-tool=${toolName}]`)
+    const evt = document.createEvent('MouseEvents')
+    evt.initEvent('mouseup', true, true)
+    li.dispatchEvent(evt)
+  }, tool)
 }
 
-export const teardownPptrTab = async ({context:{ page, browser }}) => {
-  await page.close()
-}
+export const getActiveTool = async (page) =>
+  await page.$eval('vis-bug', (el) => el.activeTool)
 
-export const changeMode = async ({page, tool}) =>
-  await page.evaluateHandle(`
-    var mouseUpEvent = document.createEvent("MouseEvents");
-    mouseUpEvent.initEvent("mouseup", true, true);
-    document.querySelector('vis-bug').$shadow.querySelector('li[data-tool=${tool}]').dispatchEvent(mouseUpEvent);
-  `)
-
-export const getActiveTool = async page =>
-  await page.$eval('vis-bug', el =>
-    el.activeTool)
-
-export const pptrMetaKey = async page => {
-  let isMac = await page.evaluate(_ => window.navigator.platform.includes('Mac'))
-  return isMac ? "Meta" : "Control"
+export const metaKey = async (page) => {
+  const isMac = await page.evaluate(() => window.navigator.platform.includes('Mac'))
+  return isMac ? 'Meta' : 'Control'
 }
