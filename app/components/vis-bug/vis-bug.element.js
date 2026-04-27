@@ -29,6 +29,8 @@ import {
   schemeRule
 } from '../../utilities/'
 
+import { installEditLog } from '../../edit-log/index.js'
+
 export default class VisBug extends HTMLElement {
   constructor() {
     super()
@@ -46,6 +48,11 @@ export default class VisBug extends HTMLElement {
   }
 
   connectedCallback() {
+    this._editLog = installEditLog(this, {
+      bufferSize: 1000,
+      onWarn: (...args) => console.warn('[vis-bug edit-log]', ...args),
+    })
+
     this._tutsBaseURL = this.getAttribute('tutsBaseURL') || 'tuts'
 
     this.setup()
@@ -59,6 +66,7 @@ export default class VisBug extends HTMLElement {
   }
 
   disconnectedCallback() {
+    this._editLog?.teardown()
     this.deactivate_feature()
     this.cleanup()
     this.selectorEngine.disconnect()

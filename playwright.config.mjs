@@ -1,8 +1,9 @@
 import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
-  testDir: './app/features',
+  testDir: './app',
   testMatch: /.*\.test\.js$/,
+  testIgnore: /components\/.*\.test\.js$/,
   timeout: 30000,
   fullyParallel: false,
   workers: 1,
