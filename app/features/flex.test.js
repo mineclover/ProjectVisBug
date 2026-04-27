@@ -1,175 +1,133 @@
-import test from 'ava'
-
-import { setupPptrTab, teardownPptrTab, changeMode, getActiveTool, pptrMetaKey }
-from '../../tests/helpers'
+import { test, expect, changeMode, getActiveTool, metaKey } from '../../tests/helpers.js'
 
 const tool            = 'align'
 const test_selector   = '[intro] b'
 
-
-test.beforeEach(async t => {
-  await setupPptrTab(t)
-
+test.beforeEach(async ({ visbugPage }) => {
   await changeMode({
     tool,
-    page: t.context.page,
+    page: visbugPage,
   })
 })
 
-
-
-test('Can Be Activated', async t => {
-  const { page } = t.context
-  t.is(await getActiveTool(page), tool)
-  t.pass()
+test('Can Be Activated', async ({ visbugPage }) => {
+  expect(await getActiveTool(visbugPage)).toBe(tool)
 })
 
+test('Can adjust justify-content', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
+  await visbugPage.keyboard.press('ArrowRight')
+  let justifyStr = await visbugPage.$eval(test_selector, el => el.style.justifyContent)
+  expect(justifyStr).toBe('center')
 
-test('Can adjust justify-content', async t => {
-  const { page } = t.context
+  await visbugPage.keyboard.press('ArrowRight')
+  justifyStr = await visbugPage.$eval(test_selector, el => el.style.justifyContent)
+  expect(justifyStr).toBe('flex-end')
 
-  await page.click(test_selector)
-  await page.keyboard.press('ArrowRight')
-  let justifyStr = await page.$eval(test_selector, el => el.style.justifyContent)
-  t.true(justifyStr === "center")
-
-  await page.keyboard.press('ArrowRight')
-  justifyStr = await page.$eval(test_selector, el => el.style.justifyContent)
-  t.true(justifyStr === "flex-end")
-
-  await page.keyboard.press('ArrowLeft')
-  await page.keyboard.press('ArrowLeft')
-  justifyStr = await page.$eval(test_selector, el => el.style.justifyContent)
-  t.true(justifyStr === "flex-start")
-
-  t.pass()
+  await visbugPage.keyboard.press('ArrowLeft')
+  await visbugPage.keyboard.press('ArrowLeft')
+  justifyStr = await visbugPage.$eval(test_selector, el => el.style.justifyContent)
+  expect(justifyStr).toBe('flex-start')
 })
 
+test('Can adjust align-items', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
+  await visbugPage.keyboard.press('ArrowDown')
+  let alignStr = await visbugPage.$eval(test_selector, el => el.style.alignItems)
+  expect(alignStr).toBe('center')
 
-test('Can adjust align-items', async t => {
-  const { page } = t.context
+  await visbugPage.keyboard.press('ArrowDown')
+  alignStr = await visbugPage.$eval(test_selector, el => el.style.alignItems)
+  expect(alignStr).toBe('flex-end')
 
-  await page.click(test_selector)
-  await page.keyboard.press('ArrowDown')
-  let alignStr = await page.$eval(test_selector, el => el.style.alignItems)
-  t.true(alignStr === "center")
-
-  await page.keyboard.press('ArrowDown')
-  alignStr = await page.$eval(test_selector, el => el.style.alignItems)
-  t.true(alignStr === "flex-end")
-
-  await page.keyboard.press('ArrowUp')
-  await page.keyboard.press('ArrowUp')
-  alignStr = await page.$eval(test_selector, el => el.style.alignItems)
-  t.true(alignStr === "flex-start")
-
-  t.pass()
+  await visbugPage.keyboard.press('ArrowUp')
+  await visbugPage.keyboard.press('ArrowUp')
+  alignStr = await visbugPage.$eval(test_selector, el => el.style.alignItems)
+  expect(alignStr).toBe('flex-start')
 })
 
-
-test('Can apply space-around', async t => {
-  const { page } = t.context
-
-  await page.click(test_selector)
-  await page.keyboard.down('Shift')
-  await page.keyboard.press('ArrowLeft')
-  let justifyStr = await page.$eval(test_selector, el => el.style.justifyContent)
-  t.true(justifyStr === "space-around")
-
-  t.pass()
+test('Can apply space-around', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
+  await visbugPage.keyboard.down('Shift')
+  await visbugPage.keyboard.press('ArrowLeft')
+  let justifyStr = await visbugPage.$eval(test_selector, el => el.style.justifyContent)
+  expect(justifyStr).toBe('space-around')
 })
 
-
-test('Can apply space-between', async t => {
-  const { page } = t.context
-
-  await page.click(test_selector)
-  await page.keyboard.down('Shift')
-  await page.keyboard.press('ArrowRight')
-  let justifyStr = await page.$eval(test_selector, el => el.style.justifyContent)
-  t.true(justifyStr === "space-between")
-
-  t.pass()
+test('Can apply space-between', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
+  await visbugPage.keyboard.down('Shift')
+  await visbugPage.keyboard.press('ArrowRight')
+  let justifyStr = await visbugPage.$eval(test_selector, el => el.style.justifyContent)
+  expect(justifyStr).toBe('space-between')
 })
 
-test('Can adjust wrapping', async t => {
-  const { page } = t.context
-  const metaKey = await pptrMetaKey(page)
+test('Can adjust wrapping', async ({ visbugPage }) => {
+  const key = await metaKey(visbugPage)
 
-  await page.click(test_selector)
-  await page.keyboard.down(metaKey)
-  await page.keyboard.down('Shift')
-  await page.keyboard.press('ArrowUp')
-  let wrapStr = await page.$eval(test_selector, el => el.style.flexWrap)
-  t.true(wrapStr === 'nowrap')
+  await visbugPage.click(test_selector)
+  await visbugPage.keyboard.down(key)
+  await visbugPage.keyboard.down('Shift')
+  await visbugPage.keyboard.press('ArrowUp')
+  let wrapStr = await visbugPage.$eval(test_selector, el => el.style.flexWrap)
+  expect(wrapStr).toBe('nowrap')
 
-  await page.keyboard.press('ArrowUp')
-  wrapStr = await page.$eval(test_selector, el => el.style.flexWrap)
-  t.true(wrapStr === 'nowrap')
+  await visbugPage.keyboard.press('ArrowUp')
+  wrapStr = await visbugPage.$eval(test_selector, el => el.style.flexWrap)
+  expect(wrapStr).toBe('nowrap')
 
-  await page.keyboard.press('ArrowDown')
-  wrapStr = await page.$eval(test_selector, el => el.style.flexWrap)
-  t.true(wrapStr === 'wrap')
+  await visbugPage.keyboard.press('ArrowDown')
+  wrapStr = await visbugPage.$eval(test_selector, el => el.style.flexWrap)
+  expect(wrapStr).toBe('wrap')
 
-  await page.keyboard.press('ArrowDown')
-  wrapStr = await page.$eval(test_selector, el => el.style.flexWrap)
-  t.true(wrapStr === 'wrap')
-
-  t.pass()
+  await visbugPage.keyboard.press('ArrowDown')
+  wrapStr = await visbugPage.$eval(test_selector, el => el.style.flexWrap)
+  expect(wrapStr).toBe('wrap')
 })
 
-test('Can adjust row order', async t => {
-  const { page } = t.context
-  const metaKey = await pptrMetaKey(page)
+test('Can adjust row order', async ({ visbugPage }) => {
+  const key = await metaKey(visbugPage)
 
-  await page.click(test_selector)
-  await page.keyboard.down(metaKey)
-  await page.keyboard.down('Shift')
-  await page.keyboard.press('ArrowLeft')
-  let dirStr = await page.$eval(test_selector, el => el.style.flexDirection)
-  t.true(dirStr === 'row-reverse')
+  await visbugPage.click(test_selector)
+  await visbugPage.keyboard.down(key)
+  await visbugPage.keyboard.down('Shift')
+  await visbugPage.keyboard.press('ArrowLeft')
+  let dirStr = await visbugPage.$eval(test_selector, el => el.style.flexDirection)
+  expect(dirStr).toBe('row-reverse')
 
-  await page.keyboard.press('ArrowLeft')
-  dirStr = await page.$eval(test_selector, el => el.style.flexDirection)
-  t.true(dirStr === 'row-reverse')
+  await visbugPage.keyboard.press('ArrowLeft')
+  dirStr = await visbugPage.$eval(test_selector, el => el.style.flexDirection)
+  expect(dirStr).toBe('row-reverse')
 
-  await page.keyboard.press('ArrowRight')
-  dirStr = await page.$eval(test_selector, el => el.style.flexDirection)
-  t.true(dirStr === 'row')
+  await visbugPage.keyboard.press('ArrowRight')
+  dirStr = await visbugPage.$eval(test_selector, el => el.style.flexDirection)
+  expect(dirStr).toBe('row')
 
-  await page.keyboard.press('ArrowRight')
-  dirStr = await page.$eval(test_selector, el => el.style.flexDirection)
-  t.true(dirStr === 'row')
-
-  t.pass()
+  await visbugPage.keyboard.press('ArrowRight')
+  dirStr = await visbugPage.$eval(test_selector, el => el.style.flexDirection)
+  expect(dirStr).toBe('row')
 })
 
-test('Can adjust column order', async t => {
-  const { page } = t.context
-  const metaKey = await pptrMetaKey(page)
+test('Can adjust column order', async ({ visbugPage }) => {
+  const key = await metaKey(visbugPage)
 
-  await page.click(test_selector)
-  await page.keyboard.down(metaKey)
-  await page.keyboard.press('ArrowUp')
-  await page.keyboard.down('Shift')
-  await page.keyboard.press('ArrowLeft')
-  let dirStr = await page.$eval(test_selector, el => el.style.flexDirection)
-  t.true(dirStr === 'column-reverse')
+  await visbugPage.click(test_selector)
+  await visbugPage.keyboard.down(key)
+  await visbugPage.keyboard.press('ArrowUp')
+  await visbugPage.keyboard.down('Shift')
+  await visbugPage.keyboard.press('ArrowLeft')
+  let dirStr = await visbugPage.$eval(test_selector, el => el.style.flexDirection)
+  expect(dirStr).toBe('column-reverse')
 
-  await page.keyboard.press('ArrowLeft')
-  dirStr = await page.$eval(test_selector, el => el.style.flexDirection)
-  t.true(dirStr === 'column-reverse')
+  await visbugPage.keyboard.press('ArrowLeft')
+  dirStr = await visbugPage.$eval(test_selector, el => el.style.flexDirection)
+  expect(dirStr).toBe('column-reverse')
 
-  await page.keyboard.press('ArrowRight')
-  dirStr = await page.$eval(test_selector, el => el.style.flexDirection)
-  t.true(dirStr === 'column')
+  await visbugPage.keyboard.press('ArrowRight')
+  dirStr = await visbugPage.$eval(test_selector, el => el.style.flexDirection)
+  expect(dirStr).toBe('column')
 
-  await page.keyboard.press('ArrowRight')
-  dirStr = await page.$eval(test_selector, el => el.style.flexDirection)
-  t.true(dirStr === 'column')
-
-  t.pass()
+  await visbugPage.keyboard.press('ArrowRight')
+  dirStr = await visbugPage.$eval(test_selector, el => el.style.flexDirection)
+  expect(dirStr).toBe('column')
 })
-
-
-test.afterEach(teardownPptrTab)

@@ -1,3 +1,14 @@
+> **qa-sdk fork notice (2026-04-27)**
+>
+> 이 fork는 qa-sdk 모노레포의 측정 도구 평가를 위해 모더나이즈됨.
+> - Build: rollup 4 / postcss 8
+> - Tests: @playwright/test (e2e), vitest (unit, edit-log only)
+> - Node: 20+
+> - **Out of scope**: Chrome/Firefox/Safari/Edge extension builds, Xcode VisBug app — 후속 작업 예정
+> - Upstream 환원 의도 없음 (사적 변경)
+
+---
+
 <p align="center">
   <img src="./assets/visbug.png" width="300" height="300" alt="visbug">
   <br>

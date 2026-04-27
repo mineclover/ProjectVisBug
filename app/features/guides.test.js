@@ -1,19 +1,9 @@
-import test from 'ava'
+import { test, expect } from '../../tests/helpers.js'
 
-import { setupPptrTab, teardownPptrTab } 
-from '../../tests/helpers'
+test('Should show 1 overlay element on hover', async ({ visbugPage }) => {
+  await visbugPage.mouse.move(100, 200)
 
-test.beforeEach(setupPptrTab)
+  const gridlines_element = await visbugPage.evaluate(`document.querySelectorAll('visbug-gridlines').length`)
 
-test('Should show 1 overlay element on hover', async t => {
-  const { page } = t.context
-
-  await page.mouse.move(100, 200)
-
-  const gridlines_element = await page.evaluate(`document.querySelectorAll('visbug-gridlines').length`)
-
-  t.is(gridlines_element, 1)
-  t.pass()
+  expect(gridlines_element).toBe(1)
 })
-
-test.afterEach(teardownPptrTab)

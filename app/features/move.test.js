@@ -1,89 +1,61 @@
-import test from 'ava'
-
-import { setupPptrTab, teardownPptrTab, changeMode, getActiveTool } 
-from '../../tests/helpers'
+import { test, expect, changeMode, getActiveTool } from '../../tests/helpers.js'
 
 const tool            = 'move'
 const test_selector   = '[intro] b'
 
 const getNodeIndex = async (page, selector) =>
-  await page.$eval(selector, el => 
+  await page.$eval(selector, el =>
     [...el.parentNode.children].indexOf(el))
 
-test.beforeEach(async t => {
-  await setupPptrTab(t)
-
+test.beforeEach(async ({ visbugPage }) => {
   await changeMode({
     tool,
-    page: t.context.page,
+    page: visbugPage,
   })
 })
 
-test('Can Be Activated', async t => {
-  const { page } = t.context
-  t.is(await getActiveTool(page), tool)
-  t.pass()
+test('Can Be Activated', async ({ visbugPage }) => {
+  expect(await getActiveTool(visbugPage)).toBe(tool)
 })
 
-test('Can Be Deactivated', async t => {
-  const { page } = t.context
-
-  t.is(await getActiveTool(page), tool)
-  await changeMode({ tool: 'padding', page })
-  t.is(await getActiveTool(page), 'padding')
-
-  t.pass()
+test('Can Be Deactivated', async ({ visbugPage }) => {
+  expect(await getActiveTool(visbugPage)).toBe(tool)
+  await changeMode({ tool: 'padding', page: visbugPage })
+  expect(await getActiveTool(visbugPage)).toBe('padding')
 })
 
-test('Move sibling up the branch', async t => {
-  const { page } = t.context
+test('Move sibling up the branch', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
+  expect(await getNodeIndex(visbugPage, test_selector)).toBe(2)
 
-  await page.click(test_selector)
-  t.is(await getNodeIndex(page, test_selector), 2)
+  await visbugPage.keyboard.press('ArrowLeft')
 
-  await page.keyboard.press('ArrowLeft')
-
-  t.is(await getNodeIndex(page, test_selector), 1)
-
-  t.pass()
+  expect(await getNodeIndex(visbugPage, test_selector)).toBe(1)
 })
 
-test('Move sibling down the branch', async t => {
-  const { page } = t.context
+test('Move sibling down the branch', async ({ visbugPage }) => {
   const alt_selector = '[intro] em'
 
-  await page.click(alt_selector)
-  t.is(await getNodeIndex(page, alt_selector), 0)
+  await visbugPage.click(alt_selector)
+  expect(await getNodeIndex(visbugPage, alt_selector)).toBe(0)
 
-  await page.keyboard.press('ArrowRight')
+  await visbugPage.keyboard.press('ArrowRight')
 
-  t.is(await getNodeIndex(page, alt_selector), 1)
-
-  t.pass()
+  expect(await getNodeIndex(visbugPage, alt_selector)).toBe(1)
 })
 
-test('Grips overlay siblings when 1 is selected', async t => {
-  const { page } = t.context
+test('Grips overlay siblings when 1 is selected', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
 
-  await page.click(test_selector)
-  
-  const grips_count = await page.evaluate('document.querySelectorAll("visbug-grip").length')
+  const grips_count = await visbugPage.evaluate('document.querySelectorAll("visbug-grip").length')
 
-  t.is(grips_count, 3)
-
-  t.pass()
+  expect(grips_count).toBe(3)
 })
 
-test('Drag bounds are highlighted', async t => {
-  const { page } = t.context
+test('Drag bounds are highlighted', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
 
-  await page.click(test_selector)
-  
-  const bounds_count = await page.evaluate('document.querySelectorAll("[visbug-drag-container]").length')
+  const bounds_count = await visbugPage.evaluate('document.querySelectorAll("[visbug-drag-container]").length')
 
-  t.is(bounds_count, 1)
-
-  t.pass()
+  expect(bounds_count).toBe(1)
 })
-
-test.afterEach(teardownPptrTab)

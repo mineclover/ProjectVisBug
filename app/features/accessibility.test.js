@@ -1,62 +1,45 @@
-import test from 'ava'
-import { setupPptrTab, teardownPptrTab, getActiveTool, changeMode } from '../../tests/helpers'
-
-test.beforeEach(setupPptrTab)
+import { test, expect, getActiveTool, changeMode } from '../../tests/helpers.js'
 
 const contrastValueSelector = `document.querySelector('visbug-ally').$shadow.querySelector('span[contrast]').textContent.trim()`
 
-test('Can be activated', async t => {
-  const {page} = t.context;
-  await changeMode({page, tool: 'accessibility'})
+test('Can be activated', async ({ visbugPage }) => {
+  await changeMode({page: visbugPage, tool: 'accessibility'})
 
-  t.is(await getActiveTool(page), 'accessibility')
-  t.pass()
+  expect(await getActiveTool(visbugPage)).toBe('accessibility')
 })
 
-// test('Can reveal color contrasts between html nodes and backgrounds', async t => {
-//   const {page} = t.context;
-//   await changeMode({page, tool: 'accessibility'})
+// test('Can reveal color contrasts between html nodes and backgrounds', async ({ visbugPage }) => {
+//   await changeMode({page: visbugPage, tool: 'accessibility'})
 
-//   await page.hover('.google-blue')
-//   const blueContrastValue = await page.evaluate(contrastValueSelector)
-//   t.is(blueContrastValue, "3.56")
-//   t.pass()
+//   await visbugPage.hover('.google-blue')
+//   const blueContrastValue = await visbugPage.evaluate(contrastValueSelector)
+//   expect(blueContrastValue).toBe("3.56")
 
+//   await visbugPage.hover('.google-red')
+//   const redContrastValue = await visbugPage.evaluate(contrastValueSelector)
+//   expect(redContrastValue).toBe("4.29")
 
-//   await page.hover('.google-red')
-//   const redContrastValue = await page.evaluate(contrastValueSelector)
-//   t.is(redContrastValue, "4.29")
-//   t.pass()
-
-//   await page.hover('.google-yellow')
-//   const yellowContrastValue = await page.evaluate(contrastValueSelector)
-//   t.is(yellowContrastValue, "1.84")
-//   t.pass()
+//   await visbugPage.hover('.google-yellow')
+//   const yellowContrastValue = await visbugPage.evaluate(contrastValueSelector)
+//   expect(yellowContrastValue).toBe("1.84")
 // })
 
-test('Does not show a11y tooltip on <svg> node', async t => {
-  const {page} = t.context;
-  await changeMode({page, tool: 'accessibility'})
+test('Does not show a11y tooltip on <svg> node', async ({ visbugPage }) => {
+  await changeMode({page: visbugPage, tool: 'accessibility'})
 
-  const svgEl = await page.$('svg')
+  const svgEl = await visbugPage.$('svg')
   const {x, y} = await svgEl.boundingBox()
-  await page.mouse.click(x + 1, y + 1) // an empty space of the first svg element
-  const targetNodeName = await page.$eval('[data-selected="true"]', el => el.nodeName)
-  t.is(targetNodeName, 'svg')
-  t.pass()
+  await visbugPage.mouse.click(x + 1, y + 1) // an empty space of the first svg element
+  const targetNodeName = await visbugPage.$eval('[data-selected="true"]', el => el.nodeName)
+  expect(targetNodeName).toBe('svg')
 
-  t.is(await page.$('visbug-ally'), null)
-  t.pass()
+  expect(await visbugPage.$('visbug-ally')).toBeNull()
 })
 
-test('Gets fill or stroke value first if the target is one of svg elements', async t => {
-  const {page} = t.context;
-  await changeMode({page, tool: 'accessibility'})
+test('Gets fill or stroke value first if the target is one of svg elements', async ({ visbugPage }) => {
+  await changeMode({page: visbugPage, tool: 'accessibility'})
 
-  await page.hover('svg')
-  const pathContrastValue = await page.evaluate(contrastValueSelector)
-  t.not(pathContrastValue, "10.44")
-  t.pass()
+  await visbugPage.hover('svg')
+  const pathContrastValue = await visbugPage.evaluate(contrastValueSelector)
+  expect(pathContrastValue).not.toBe('10.44')
 })
-
-test.afterEach(teardownPptrTab)
