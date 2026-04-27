@@ -30,6 +30,7 @@ import {
 } from '../../utilities/'
 
 import { installEditLog } from '../../edit-log/index.js'
+import '../edit-log-panel/edit-log-panel.element.js'
 
 export default class VisBug extends HTMLElement {
   constructor() {
@@ -53,6 +54,45 @@ export default class VisBug extends HTMLElement {
       onWarn: (...args) => console.warn('[vis-bug edit-log]', ...args),
     })
 
+    this._editLogPanel = document.createElement('edit-log-panel')
+    this._editLogPanel.style.display = 'none'
+    document.body.appendChild(this._editLogPanel)
+
+    this._editLogPanelRefresh = () => {
+      this._editLogPanel.entries = this.getHistory({ merge: 'correlated' })
+    }
+    this.addEventListener('editlog', this._editLogPanelRefresh)
+
+    this._editLogPanel.addEventListener('edit-log-clear', () => {
+      this.clearHistory()
+      this._editLogPanelRefresh()
+    })
+
+    this._editLogPanel.addEventListener('edit-log-copy', async (e) => {
+      const fmts = this._editLogFormatters
+      const merged = this.getHistory({ merge: 'correlated' })
+      const text =
+        e.detail.format === 'css' ? fmts.toCSS(merged) :
+        e.detail.format === 'script' ? fmts.toScript(merged) :
+        fmts.toJSON(merged)
+      try {
+        await navigator.clipboard.writeText(text)
+      } catch (err) {
+        console.warn('[vis-bug] clipboard write failed', err)
+      }
+    })
+
+    this.toggleEditLogPanel = (force) => {
+      const next = typeof force === 'boolean' ? force : this._editLogPanel.style.display === 'none'
+      this._editLogPanel.style.display = next ? '' : 'none'
+      if (next) this._editLogPanelRefresh()
+    }
+
+    hotkeys('cmd+shift+l, ctrl+shift+l', (e) => {
+      e.preventDefault()
+      this.toggleEditLogPanel()
+    })
+
     this._tutsBaseURL = this.getAttribute('tutsBaseURL') || 'tuts'
 
     this.setup()
@@ -67,6 +107,8 @@ export default class VisBug extends HTMLElement {
 
   disconnectedCallback() {
     this._editLog?.teardown()
+    this._editLogPanel?.remove()
+    if (this._editLogPanelRefresh) this.removeEventListener('editlog', this._editLogPanelRefresh)
     this.deactivate_feature()
     this.cleanup()
     this.selectorEngine.disconnect()
