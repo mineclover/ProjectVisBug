@@ -1,7 +1,7 @@
-const postcssPresetEnv  = require('postcss-preset-env')
-const postcssImport     = require('postcss-import')
+import postcssPresetEnv from 'postcss-preset-env'
+import postcssImport from 'postcss-import'
 
-module.exports = {
+export default {
   plugins: [
     postcssImport(),
     postcssPresetEnv({
