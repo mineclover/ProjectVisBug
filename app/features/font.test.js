@@ -1,7 +1,4 @@
-import test from 'ava'
-
-import { setupPptrTab, teardownPptrTab, changeMode, getActiveTool, pptrMetaKey }
-from '../../tests/helpers'
+import { test, expect, changeMode, getActiveTool, metaKey } from '../../tests/helpers.js'
 
 const tool            = 'font'
 const test_selector   = '[intro] b'
@@ -11,121 +8,92 @@ const getInlineStyle = async (page, prop) =>
     return el.style[prop]
   }, prop)
 
-test.beforeEach(async t => {
-  await setupPptrTab(t)
-
+test.beforeEach(async ({ visbugPage }) => {
   await changeMode({
     tool,
-    page: t.context.page,
+    page: visbugPage,
   })
 })
 
-test('Can Be Activated', async t => {
-  const { page } = t.context
-  t.is(await getActiveTool(page), tool)
-  t.pass()
+test('Can Be Activated', async ({ visbugPage }) => {
+  expect(await getActiveTool(visbugPage)).toBe(tool)
 })
 
-test('Can Be Deactivated', async t => {
-  const { page } = t.context
-
-  t.is(await getActiveTool(page), tool)
-  await changeMode({ tool: 'padding', page })
-  t.is(await getActiveTool(page), 'padding')
-
-  t.pass()
+test('Can Be Deactivated', async ({ visbugPage }) => {
+  expect(await getActiveTool(visbugPage)).toBe(tool)
+  await changeMode({ tool: 'padding', page: visbugPage })
+  expect(await getActiveTool(visbugPage)).toBe('padding')
 })
 
-test('Can change size', async t => {
-  const { page } = t.context
+test('Can change size', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
+  expect(await getInlineStyle(visbugPage, 'font-size')).toBe('')
 
-  await page.click(test_selector)
-  t.is(await getInlineStyle(page, 'font-size'), '')
+  await visbugPage.keyboard.press('ArrowUp')
+  expect(await getInlineStyle(visbugPage, 'font-size')).toBe('17px')
 
-  await page.keyboard.press('ArrowUp')
-  t.is(await getInlineStyle(page, 'font-size'), '17px')
-
-  await page.keyboard.press('ArrowDown')
-  await page.keyboard.press('ArrowDown')
-  t.is(await getInlineStyle(page, 'font-size'), '15px')
-
-  t.pass()
+  await visbugPage.keyboard.press('ArrowDown')
+  await visbugPage.keyboard.press('ArrowDown')
+  expect(await getInlineStyle(visbugPage, 'font-size')).toBe('15px')
 })
 
-test('Can change alignment', async t => {
-  const { page } = t.context
+test('Can change alignment', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
+  expect(await getInlineStyle(visbugPage, 'text-align')).toBe('')
 
-  await page.click(test_selector)
-  t.is(await getInlineStyle(page, 'text-align'), '')
+  await visbugPage.keyboard.press('ArrowRight')
+  expect(await getInlineStyle(visbugPage, 'text-align')).toBe('right')
 
-  await page.keyboard.press('ArrowRight')
-  t.is(await getInlineStyle(page, 'text-align'), 'right')
+  await visbugPage.keyboard.press('ArrowLeft')
+  expect(await getInlineStyle(visbugPage, 'text-align')).toBe('center')
 
-  await page.keyboard.press('ArrowLeft')
-  t.is(await getInlineStyle(page, 'text-align'), 'center')
-
-  await page.keyboard.press('ArrowLeft')
-  t.is(await getInlineStyle(page, 'text-align'), 'left')
-
-  t.pass()
+  await visbugPage.keyboard.press('ArrowLeft')
+  expect(await getInlineStyle(visbugPage, 'text-align')).toBe('left')
 })
 
-test('Can change leading', async t => {
-  const { page } = t.context
+test('Can change leading', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
+  expect(await getInlineStyle(visbugPage, 'line-height')).toBe('')
 
-  await page.click(test_selector)
-  t.is(await getInlineStyle(page, 'line-height'), '')
+  await visbugPage.keyboard.down('Shift')
+  await visbugPage.keyboard.press('ArrowUp')
+  await visbugPage.keyboard.up('Shift')
+  expect(await getInlineStyle(visbugPage, 'line-height')).toBe('20px')
 
-  await page.keyboard.down('Shift')
-  await page.keyboard.press('ArrowUp')
-  await page.keyboard.up('Shift')
-  t.is(await getInlineStyle(page, 'line-height'), '20px')
-
-  await page.keyboard.down('Shift')
-  await page.keyboard.press('ArrowDown')
-  await page.keyboard.up('Shift')
-  t.is(await getInlineStyle(page, 'line-height'), '19px')
-
-  t.pass()
+  await visbugPage.keyboard.down('Shift')
+  await visbugPage.keyboard.press('ArrowDown')
+  await visbugPage.keyboard.up('Shift')
+  expect(await getInlineStyle(visbugPage, 'line-height')).toBe('19px')
 })
 
-test('Can change letter space', async t => {
-  const { page } = t.context
+test('Can change letter space', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
+  expect(await getInlineStyle(visbugPage, 'letter-spacing')).toBe('')
 
-  await page.click(test_selector)
-  t.is(await getInlineStyle(page, 'letter-spacing'), '')
+  await visbugPage.keyboard.down('Shift')
+  await visbugPage.keyboard.press('ArrowRight')
+  await visbugPage.keyboard.up('Shift')
+  expect(await getInlineStyle(visbugPage, 'letter-spacing')).toBe('1.6px')
 
-  await page.keyboard.down('Shift')
-  await page.keyboard.press('ArrowRight')
-  await page.keyboard.up('Shift')
-  t.is(await getInlineStyle(page, 'letter-spacing'), '1.6px')
-
-  await page.keyboard.down('Shift')
-  await page.keyboard.press('ArrowLeft')
-  await page.keyboard.up('Shift')
-  t.is(await getInlineStyle(page, 'letter-spacing'), '1.5px')
-
-  t.pass()
+  await visbugPage.keyboard.down('Shift')
+  await visbugPage.keyboard.press('ArrowLeft')
+  await visbugPage.keyboard.up('Shift')
+  expect(await getInlineStyle(visbugPage, 'letter-spacing')).toBe('1.5px')
 })
 
-test('Can change weight', async t => {
-  const { page } = t.context
-  const metaKey = await pptrMetaKey(page)
+test('Can change weight', async ({ visbugPage }) => {
+  const key = await metaKey(visbugPage)
 
-  await page.click(test_selector)
-  t.is(await getInlineStyle(page, 'font-weight'), '')
+  await visbugPage.click(test_selector)
+  expect(await getInlineStyle(visbugPage, 'font-weight')).toBe('')
 
-  await page.keyboard.down(metaKey)
-  await page.keyboard.press('ArrowUp')
-  await page.keyboard.up(metaKey)
-  t.is(await getInlineStyle(page, 'font-weight'), '800')
+  await visbugPage.keyboard.down(key)
+  await visbugPage.keyboard.press('ArrowUp')
+  await visbugPage.keyboard.up(key)
+  expect(await getInlineStyle(visbugPage, 'font-weight')).toBe('800')
 
-  await page.keyboard.down(metaKey)
-  await page.keyboard.press('ArrowDown')
-  await page.keyboard.up(metaKey)
-  t.is(await getInlineStyle(page, 'font-weight'), '700')
-
-  t.pass()
+  await visbugPage.keyboard.down(key)
+  await visbugPage.keyboard.press('ArrowDown')
+  await visbugPage.keyboard.up(key)
+  expect(await getInlineStyle(visbugPage, 'font-weight')).toBe('700')
 })
-
-test.afterEach(teardownPptrTab)

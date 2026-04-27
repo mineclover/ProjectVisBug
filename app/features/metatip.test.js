@@ -1,56 +1,37 @@
-import test from 'ava'
-
-import { setupPptrTab, teardownPptrTab, changeMode, getActiveTool }
-from '../../tests/helpers'
+import { test, expect, changeMode, getActiveTool } from '../../tests/helpers.js'
 
 const tool            = 'inspector'
 const test_selector   = '[intro] b'
 
-test.beforeEach(async t => {
-  await setupPptrTab(t)
-
+test.beforeEach(async ({ visbugPage }) => {
   await changeMode({
     tool,
-    page: t.context.page,
+    page: visbugPage,
   })
 })
 
-test('Can Be Activated', async t => {
-  const { page } = t.context
-  t.is(await getActiveTool(page), tool)
-  t.pass()
+test('Can Be Activated', async ({ visbugPage }) => {
+  expect(await getActiveTool(visbugPage)).toBe(tool)
 })
 
-test('Can Be Deactivated', async t => {
-  const { page } = t.context
-
-  t.is(await getActiveTool(page), tool)
-  await changeMode({ tool: 'padding', page })
-  t.is(await getActiveTool(page), 'padding')
-
-  t.pass()
+test('Can Be Deactivated', async ({ visbugPage }) => {
+  expect(await getActiveTool(visbugPage)).toBe(tool)
+  await changeMode({ tool: 'padding', page: visbugPage })
+  expect(await getActiveTool(visbugPage)).toBe('padding')
 })
 
-test('Should show 1 metatip on click', async t => {
-  const { page } = t.context
+test('Should show 1 metatip on click', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
+  const metatip_element = await visbugPage.evaluate(`document.querySelectorAll('visbug-metatip').length`)
 
-  await page.click(test_selector)
-  const metatip_element = await page.evaluate(`document.querySelectorAll('visbug-metatip').length`)
-
-  t.is(metatip_element, 1)
-  t.pass()
+  expect(metatip_element).toBe(1)
 })
 
-test('Should show tag name in header', async t => {
-  const { page } = t.context
-
-  await page.click(test_selector)
-  const metatip_header_tag = await page.evaluate(
+test('Should show tag name in header', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
+  const metatip_header_tag = await visbugPage.evaluate(
     `document.querySelector('visbug-metatip').$shadow.querySelector('figure > header a[node]').textContent`
   )
 
-  t.is(metatip_header_tag, 'b')
-  t.pass()
+  expect(metatip_header_tag).toBe('b')
 })
-
-test.afterEach(teardownPptrTab)

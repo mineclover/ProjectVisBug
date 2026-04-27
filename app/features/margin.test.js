@@ -1,84 +1,59 @@
-import test from 'ava'
-
-import { setupPptrTab, teardownPptrTab, changeMode, getActiveTool } 
-from '../../tests/helpers'
+import { test, expect, changeMode, getActiveTool } from '../../tests/helpers.js'
 
 const tool            = 'margin'
 const test_selector   = '[intro] b'
 
 const getMarginTop = async page =>
-  await page.$eval(test_selector, el => 
+  await page.$eval(test_selector, el =>
     el.style.marginTop)
 
-test.beforeEach(async t => {
-  await setupPptrTab(t)
-
+test.beforeEach(async ({ visbugPage }) => {
   await changeMode({
     tool,
-    page: t.context.page,
+    page: visbugPage,
   })
 })
 
-test('Can Be Activated', async t => {
-  const { page } = t.context
-  t.is(await getActiveTool(page), tool)
-  t.pass()
+test('Can Be Activated', async ({ visbugPage }) => {
+  expect(await getActiveTool(visbugPage)).toBe(tool)
 })
 
-test('Can Be Deactivated', async t => {
-  const { page } = t.context
-
-  t.is(await getActiveTool(page), tool)
-  await changeMode({ tool: 'padding', page })
-  t.is(await getActiveTool(page), 'padding')
-
-  t.pass()
+test('Can Be Deactivated', async ({ visbugPage }) => {
+  expect(await getActiveTool(visbugPage)).toBe(tool)
+  await changeMode({ tool: 'padding', page: visbugPage })
+  expect(await getActiveTool(visbugPage)).toBe('padding')
 })
 
-test('Adds margin to side', async t => {
-  const { page } = t.context
+test('Adds margin to side', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
 
-  await page.click(test_selector)
+  expect(await getMarginTop(visbugPage)).toBe('')
 
-  t.is(await getMarginTop(page), '')
+  await visbugPage.keyboard.press('ArrowUp')
 
-  await page.keyboard.press('ArrowUp')
-
-  t.is(await getMarginTop(page), '1px')
-
-  t.pass()
+  expect(await getMarginTop(visbugPage)).toBe('1px')
 })
 
-test('Remove margin from side', async t => {
-  const { page } = t.context
+test('Remove margin from side', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
+  expect(await getMarginTop(visbugPage)).toBe('')
 
-  await page.click(test_selector)
-  t.is(await getMarginTop(page), '')
+  await visbugPage.keyboard.press('ArrowUp')
+  expect(await getMarginTop(visbugPage)).toBe('1px')
 
-  await page.keyboard.press('ArrowUp')
-  t.is(await getMarginTop(page), '1px')
-
-  await page.keyboard.down('Alt')
-  await page.keyboard.down('ArrowUp')
-  await page.keyboard.up('Alt')
-  await page.keyboard.up('ArrowUp')
-  t.is(await getMarginTop(page), '0px')
-
-  t.pass()
+  await visbugPage.keyboard.down('Alt')
+  await visbugPage.keyboard.down('ArrowUp')
+  await visbugPage.keyboard.up('Alt')
+  await visbugPage.keyboard.up('ArrowUp')
+  expect(await getMarginTop(visbugPage)).toBe('0px')
 })
 
-test('Can change values by 10 with shift key', async t => {
-  const { page } = t.context
+test('Can change values by 10 with shift key', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
+  expect(await getMarginTop(visbugPage)).toBe('')
 
-  await page.click(test_selector)
-  t.is(await getMarginTop(page), '')
-
-  await page.keyboard.down('Shift')
-  await page.keyboard.press('ArrowUp')
-  await page.keyboard.up('Shift')
-  t.is(await getMarginTop(page), '10px')
-
-  t.pass()
+  await visbugPage.keyboard.down('Shift')
+  await visbugPage.keyboard.press('ArrowUp')
+  await visbugPage.keyboard.up('Shift')
+  expect(await getMarginTop(visbugPage)).toBe('10px')
 })
-
-test.afterEach(teardownPptrTab)

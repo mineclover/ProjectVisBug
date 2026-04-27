@@ -1,64 +1,49 @@
-import test from 'ava'
-
-import { setupPptrTab, teardownPptrTab, changeMode }
-from '../../tests/helpers'
+import { test, expect, changeMode } from '../../tests/helpers.js'
 
 const test_selector   = '[intro] b'
 
-test.beforeEach(setupPptrTab)
+test('Can show 1 label on click', async ({ visbugPage }) => {
+  await changeMode({tool: 'font', page: visbugPage})
 
-test('Can show 1 label on click', async t => {
-  await changeMode({tool: 'font', page: t.context.page})
-  const { page } = t.context
+  await visbugPage.click(test_selector)
 
-  await page.click(test_selector)
+  const label_element = await visbugPage.evaluate(`document.querySelectorAll('visbug-label').length`)
 
-  const label_element = await page.evaluate(`document.querySelectorAll('visbug-label').length`)
-
-  t.is(label_element, 1)
-  t.pass()
+  expect(label_element).toBe(1)
 })
 
-test('Can show tag name label on click', async t => {
-  await changeMode({tool: 'font', page: t.context.page})
-  const { page } = t.context
+test('Can show tag name label on click', async ({ visbugPage }) => {
+  await changeMode({tool: 'font', page: visbugPage})
 
-  await page.click(test_selector)
+  await visbugPage.click(test_selector)
 
-  const label_element = await page.evaluate(
+  const label_element = await visbugPage.evaluate(
     `document.querySelector('visbug-label').$shadow.querySelector('span a').textContent`
-  );
+  )
 
-  t.is(label_element, 'b');
-  t.pass()
+  expect(label_element).toBe('b')
 })
 
-test('Can show layout property label on click', async t => {
-  await changeMode({tool: 'align', page: t.context.page})
-  const { page } = t.context
+test('Can show layout property label on click', async ({ visbugPage }) => {
+  await changeMode({tool: 'align', page: visbugPage})
 
-  await page.click(test_selector)
+  await visbugPage.click(test_selector)
 
-  const label_element = await page.evaluate(
+  const label_element = await visbugPage.evaluate(
     `document.querySelector('visbug-label').$shadow.querySelector('span').textContent`
-  );
+  )
 
-  t.is(label_element, 'inline');
-  t.pass()
+  expect(label_element).toBe('inline')
 })
 
-test('Can show proper tag name label after position tool clicked', async t => {
-  await changeMode({tool: 'position', page: t.context.page})
-  const { page } = t.context
+test('Can show proper tag name label after position tool clicked', async ({ visbugPage }) => {
+  await changeMode({tool: 'position', page: visbugPage})
 
-  await page.click(test_selector)
+  await visbugPage.click(test_selector)
 
-  const label_element = await page.evaluate(
+  const label_element = await visbugPage.evaluate(
     `document.querySelector('visbug-label').$shadow.querySelector('span a').textContent`
-  );
+  )
 
-  t.is(label_element, "b");
-  t.pass();
+  expect(label_element).toBe('b')
 })
-
-test.afterEach(teardownPptrTab)

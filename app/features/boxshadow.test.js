@@ -1,7 +1,4 @@
-import test from 'ava'
-
-import { setupPptrTab, teardownPptrTab, changeMode, getActiveTool, pptrMetaKey }
-from '../../tests/helpers'
+import { test, expect, changeMode, getActiveTool, metaKey } from '../../tests/helpers.js'
 
 const tool            = 'boxshadow'
 const test_selector   = '[intro] b'
@@ -16,102 +13,76 @@ const parseShadowValues = (str) => {
   return { color, x, y, blur, spread, inset : inset !== undefined }
 }
 
-test.beforeEach(async t => {
-  await setupPptrTab(t)
-
+test.beforeEach(async ({ visbugPage }) => {
   await changeMode({
     tool,
-    page: t.context.page,
+    page: visbugPage,
   })
 })
 
-test('Can Be Activated', async t => {
-  const { page } = t.context
-  t.is(await getActiveTool(page), tool)
-  t.pass()
+test('Can Be Activated', async ({ visbugPage }) => {
+  expect(await getActiveTool(visbugPage)).toBe(tool)
 })
 
-test('Can adjust X position', async t => {
-  const { page } = t.context
-
-  await page.click(test_selector)
-  await page.keyboard.press('ArrowRight')
-  let shadow = await getShadowValues(page)
-  t.true(shadow.x === "1px")
+test('Can adjust X position', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
+  await visbugPage.keyboard.press('ArrowRight')
+  let shadow = await getShadowValues(visbugPage)
+  expect(shadow.x).toBe('1px')
   //test shift case
-  await page.keyboard.down('Shift')
-  await page.keyboard.press('ArrowRight')
-  shadow = await getShadowValues(page)
-  t.true(shadow.x === "11px")
-
-  t.pass()
+  await visbugPage.keyboard.down('Shift')
+  await visbugPage.keyboard.press('ArrowRight')
+  shadow = await getShadowValues(visbugPage)
+  expect(shadow.x).toBe('11px')
 })
 
-
-test('Can adjust Y position', async t => {
-  const { page } = t.context
-
-  await page.click(test_selector)
-  await page.keyboard.press('ArrowDown')
-  let shadow = await getShadowValues(page)
-  t.true(shadow.y === "1px")
+test('Can adjust Y position', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
+  await visbugPage.keyboard.press('ArrowDown')
+  let shadow = await getShadowValues(visbugPage)
+  expect(shadow.y).toBe('1px')
   //test shift case
-  await page.keyboard.down('Shift')
-  await page.keyboard.press('ArrowDown')
-  shadow = await getShadowValues(page)
-  t.true(shadow.y === "11px")
-
-  t.pass()
+  await visbugPage.keyboard.down('Shift')
+  await visbugPage.keyboard.press('ArrowDown')
+  shadow = await getShadowValues(visbugPage)
+  expect(shadow.y).toBe('11px')
 })
 
-test('Shadow Blur Works', async t => {
-  const { page } = t.context
-
-  await page.click(test_selector)
-  await page.keyboard.press('ArrowDown')
-  await page.keyboard.down('Alt')
-  await page.keyboard.press('ArrowUp')
-  let shadow = await getShadowValues(page)
-  t.true(shadow.blur === "1px")
+test('Shadow Blur Works', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
+  await visbugPage.keyboard.press('ArrowDown')
+  await visbugPage.keyboard.down('Alt')
+  await visbugPage.keyboard.press('ArrowUp')
+  let shadow = await getShadowValues(visbugPage)
+  expect(shadow.blur).toBe('1px')
   //test shift case
-  await page.keyboard.down('Shift')
-  await page.keyboard.press('ArrowUp')
-  shadow = await getShadowValues(page)
-  t.true(shadow.blur === "11px")
-
-  t.pass()
+  await visbugPage.keyboard.down('Shift')
+  await visbugPage.keyboard.press('ArrowUp')
+  shadow = await getShadowValues(visbugPage)
+  expect(shadow.blur).toBe('11px')
 })
 
-test('Shadow Spread Works', async t => {
-  const { page } = t.context
-
-  await page.click(test_selector)
-  await page.keyboard.press('ArrowDown')
-  await page.keyboard.down('Alt')
-  await page.keyboard.press('ArrowRight')
-  let shadow = await getShadowValues(page)
-  t.true(shadow.spread === "1px")
+test('Shadow Spread Works', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
+  await visbugPage.keyboard.press('ArrowDown')
+  await visbugPage.keyboard.down('Alt')
+  await visbugPage.keyboard.press('ArrowRight')
+  let shadow = await getShadowValues(visbugPage)
+  expect(shadow.spread).toBe('1px')
   //test shift case
-  await page.keyboard.down('Shift')
-  await page.keyboard.press('ArrowRight')
-  shadow = await getShadowValues(page)
-  t.true(shadow.spread === "11px")
-
-  t.pass()
+  await visbugPage.keyboard.down('Shift')
+  await visbugPage.keyboard.press('ArrowRight')
+  shadow = await getShadowValues(visbugPage)
+  expect(shadow.spread).toBe('11px')
 })
 
-test('Shadow can be set to inset', async t => {
-  const { page } = t.context
+test('Shadow can be set to inset', async ({ visbugPage }) => {
+  const key = await metaKey(visbugPage)
 
-  await page.click(test_selector)
-  await page.keyboard.press('ArrowDown')
-  await page.keyboard.down(await pptrMetaKey(page))
-  await page.keyboard.press('ArrowDown')
-  const shadow = await getShadowValues(page)
-  t.true(shadow.inset)
-
-  t.pass()
+  await visbugPage.click(test_selector)
+  await visbugPage.keyboard.press('ArrowDown')
+  await visbugPage.keyboard.down(key)
+  await visbugPage.keyboard.press('ArrowDown')
+  const shadow = await getShadowValues(visbugPage)
+  expect(shadow.inset).toBe(true)
 })
-
-
-test.afterEach(teardownPptrTab)

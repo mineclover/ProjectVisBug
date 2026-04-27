@@ -1,98 +1,71 @@
-import test from 'ava'
-
-import { setupPptrTab, teardownPptrTab, changeMode, getActiveTool }
-from '../../tests/helpers'
+import { test, expect, changeMode, getActiveTool } from '../../tests/helpers.js'
 
 const tool            = 'position'
 const test_selector   = '[intro] h1'
 
-test.beforeEach(async t => {
-  await setupPptrTab(t)
-
+test.beforeEach(async ({ visbugPage }) => {
   await changeMode({
     tool,
-    page: t.context.page,
+    page: visbugPage,
   })
 })
 
-test('Can Be Activated', async t => {
-  const { page } = t.context
-  t.is(await getActiveTool(page), tool)
-  t.pass()
+test('Can Be Activated', async ({ visbugPage }) => {
+  expect(await getActiveTool(visbugPage)).toBe(tool)
 })
 
-test('Test Nudge Up/Down Works', async t => {
-  const { page } = t.context
+test('Test Nudge Up/Down Works', async ({ visbugPage }) => {
+  const originalPageTop = await visbugPage.$eval(test_selector, el => el.getBoundingClientRect().top)
+  await visbugPage.click(test_selector)
 
-  const originalPageTop = await page.$eval(test_selector, el => el.getBoundingClientRect().top)
-  await page.click(test_selector)
+  await visbugPage.keyboard.press('ArrowUp')
+  const changedPageTop = await visbugPage.$eval(test_selector, el => el.getBoundingClientRect().top)
+  expect(originalPageTop - 1 === changedPageTop).toBe(true)
 
-  await page.keyboard.press('ArrowUp')
-  const changedPageTop = await page.$eval(test_selector, el => el.getBoundingClientRect().top)
-  t.true(originalPageTop - 1 === changedPageTop)
-
-  await page.keyboard.press('ArrowDown')
-  await page.keyboard.press('ArrowDown')
-  const finalPageTop = await page.$eval(test_selector, el => el.getBoundingClientRect().top)
-  t.true(originalPageTop + 1 === finalPageTop)
-
-  t.pass()
+  await visbugPage.keyboard.press('ArrowDown')
+  await visbugPage.keyboard.press('ArrowDown')
+  const finalPageTop = await visbugPage.$eval(test_selector, el => el.getBoundingClientRect().top)
+  expect(originalPageTop + 1 === finalPageTop).toBe(true)
 })
 
-test('Test Nudge Left/Right Works', async t => {
-  const { page } = t.context
+test('Test Nudge Left/Right Works', async ({ visbugPage }) => {
+  const originalPageLeft = await visbugPage.$eval(test_selector, el => el.getBoundingClientRect().left)
+  await visbugPage.click(test_selector)
 
-  const originalPageLeft = await page.$eval(test_selector, el => el.getBoundingClientRect().left)
-  await page.click(test_selector)
+  await visbugPage.keyboard.press('ArrowLeft')
+  const changedPageLeft = await visbugPage.$eval(test_selector, el => el.getBoundingClientRect().left)
+  expect(originalPageLeft - 1 === changedPageLeft).toBe(true)
 
-  await page.keyboard.press('ArrowLeft')
-  const changedPageLeft = await page.$eval(test_selector, el => el.getBoundingClientRect().left)
-  t.true(originalPageLeft - 1 === changedPageLeft)
-
-  await page.keyboard.press('ArrowRight')
-  await page.keyboard.press('ArrowRight')
-  const finalPageLeft = await page.$eval(test_selector, el => el.getBoundingClientRect().left)
-  t.true(originalPageLeft + 1 === finalPageLeft)
-
-  t.pass()
+  await visbugPage.keyboard.press('ArrowRight')
+  await visbugPage.keyboard.press('ArrowRight')
+  const finalPageLeft = await visbugPage.$eval(test_selector, el => el.getBoundingClientRect().left)
+  expect(originalPageLeft + 1 === finalPageLeft).toBe(true)
 })
 
-test('Test Shift Nudge Up/Down Works', async t => {
-  const { page } = t.context
-
-  const originalPageTop = await page.$eval(test_selector, el => el.getBoundingClientRect().top)
-  await page.click(test_selector)
-  await page.keyboard.down("Shift")
-  await page.keyboard.press('ArrowUp')
-  const changedPageTop = await page.$eval(test_selector, el => el.getBoundingClientRect().top)
-  t.true(originalPageTop - 10 === changedPageTop)
-  t.pass()
+test('Test Shift Nudge Up/Down Works', async ({ visbugPage }) => {
+  const originalPageTop = await visbugPage.$eval(test_selector, el => el.getBoundingClientRect().top)
+  await visbugPage.click(test_selector)
+  await visbugPage.keyboard.down('Shift')
+  await visbugPage.keyboard.press('ArrowUp')
+  const changedPageTop = await visbugPage.$eval(test_selector, el => el.getBoundingClientRect().top)
+  expect(originalPageTop - 10 === changedPageTop).toBe(true)
 })
 
-
-test('Test Drag Works', async t => {
-  const { page } = t.context
-
-  const { originalTop, originalLeft } = await page.$eval(test_selector, el => {
+test('Test Drag Works', async ({ visbugPage }) => {
+  const { originalTop, originalLeft } = await visbugPage.$eval(test_selector, el => {
     return {
       originalTop : el.getBoundingClientRect().top,
       originalLeft : el.getBoundingClientRect().left
     }
   })
 
-  await page.click(test_selector)
+  await visbugPage.click(test_selector)
 
-  await page.mouse.down()
-  await page.mouse.move(20,20)
-  const changedPageTop = await page.$eval(test_selector, el => el.getBoundingClientRect().top)
-  const changedPageLeft = await page.$eval(test_selector, el => el.getBoundingClientRect().left)
+  await visbugPage.mouse.down()
+  await visbugPage.mouse.move(20, 20)
+  const changedPageTop = await visbugPage.$eval(test_selector, el => el.getBoundingClientRect().top)
+  const changedPageLeft = await visbugPage.$eval(test_selector, el => el.getBoundingClientRect().left)
 
-  t.true(changedPageTop + 50 < originalTop)
-  t.true(changedPageLeft + 50 < originalLeft)
-
-  t.pass()
+  expect(changedPageTop + 50 < originalTop).toBe(true)
+  expect(changedPageLeft + 50 < originalLeft).toBe(true)
 })
-
-
-
-test.afterEach(teardownPptrTab)

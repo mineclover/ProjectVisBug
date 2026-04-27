@@ -1,56 +1,36 @@
-import test from 'ava'
-
-import { setupPptrTab, teardownPptrTab, changeMode, getActiveTool }
-from '../../tests/helpers'
+import { test, expect, changeMode, getActiveTool } from '../../tests/helpers.js'
 
 const tool            = 'text'
 const test_selector   = '[intro] b'
 
-
-test.beforeEach(async t => {
-  await setupPptrTab(t)
-
+test.beforeEach(async ({ visbugPage }) => {
   await changeMode({
     tool,
-    page: t.context.page,
+    page: visbugPage,
   })
 })
 
-test('Can Be Activated', async t => {
-  const { page } = t.context
-  t.is(await getActiveTool(page), tool)
-  t.pass()
+test('Can Be Activated', async ({ visbugPage }) => {
+  expect(await getActiveTool(visbugPage)).toBe(tool)
 })
 
-test('Can insert text content', async t => {
-  const { page } = t.context
+test('Can insert text content', async ({ visbugPage }) => {
+  await visbugPage.click(test_selector)
 
-  await page.click(test_selector)
+  await visbugPage.keyboard.type('foo')
 
-  await page.keyboard.type('foo')
-
-  t.true((await page.$eval(test_selector, el => el.innerHTML)).includes('foo'))
-
-  t.pass()
+  expect((await visbugPage.$eval(test_selector, el => el.innerHTML)).includes('foo')).toBe(true)
 })
 
+test('Can delete text content', async ({ visbugPage }) => {
+  const original = await visbugPage.$eval(test_selector, el => el.innerHTML)
 
-test('Can delete text content', async t => {
-  const { page } = t.context
+  await visbugPage.click(test_selector)
 
-  const original = await page.$eval(test_selector, el => el.innerHTML)
+  await visbugPage.keyboard.press('Delete')
+  await visbugPage.keyboard.press('Delete')
 
-  await page.click(test_selector)
+  const now = await visbugPage.$eval(test_selector, el => el.innerHTML)
 
-  await page.keyboard.press('Delete')
-  await page.keyboard.press('Delete')
-
-  const now = await page.$eval(test_selector, el => el.innerHTML)
-
-  t.true(original.length === now.length + 2)
-
-  t.pass()
+  expect(original.length === now.length + 2).toBe(true)
 })
-
-
-test.afterEach(teardownPptrTab)
