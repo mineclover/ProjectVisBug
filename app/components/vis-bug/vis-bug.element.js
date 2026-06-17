@@ -30,6 +30,7 @@ import {
 } from '../../utilities/'
 
 import { installEditLog } from '../../edit-log/index.js'
+import { setFeatureWrapper, clearFeatureBindings } from '../../edit-log/feature-bind.js'
 import '../edit-log-panel/edit-log-panel.element.js'
 
 export default class VisBug extends HTMLElement {
@@ -53,6 +54,7 @@ export default class VisBug extends HTMLElement {
       bufferSize: 1000,
       onWarn: (...args) => console.warn('[vis-bug edit-log]', ...args),
     })
+    setFeatureWrapper(this._editLog.wrapFeatureFn)
 
     this._editLogPanel = document.createElement('edit-log-panel')
     this._editLogPanel.style.display = 'none'
@@ -106,6 +108,7 @@ export default class VisBug extends HTMLElement {
   }
 
   disconnectedCallback() {
+    clearFeatureBindings()
     this._editLog?.teardown()
     this._editLogPanel?.remove()
     if (this._editLogPanelRefresh) this.removeEventListener('editlog', this._editLogPanelRefresh)

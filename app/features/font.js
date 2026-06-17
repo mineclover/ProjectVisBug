@@ -1,5 +1,6 @@
 import hotkeys from 'hotkeys-js'
 import { metaKey, getStyle, showHideSelected } from '../utilities/'
+import { bindFeatureCall } from '../edit-log/feature-bind.js'
 
 const key_events = 'up,down,left,right'
   .split(',')
@@ -59,7 +60,13 @@ export function Font({selection}) {
   }
 }
 
-export function changeLeading(els, direction) {
+function resolveFontTarget(args) {
+  const [els] = args
+  if (!els?.length) return null
+  return showHideSelected(els[0])
+}
+
+function changeLeadingImpl(els, direction) {
   els
     .map(el => showHideSelected(el))
     .map(el => ({
@@ -85,7 +92,9 @@ export function changeLeading(els, direction) {
       el.style[style] = `${value}px`)
 }
 
-export function changeKerning(els, direction) {
+export const changeLeading = bindFeatureCall('font', changeLeadingImpl, resolveFontTarget, 'changeLeading')
+
+function changeKerningImpl(els, direction) {
   els
     .map(el => showHideSelected(el))
     .map(el => ({
@@ -111,7 +120,9 @@ export function changeKerning(els, direction) {
       el.style[style] = `${value <= -2 ? -2 : value}px`)
 }
 
-export function changeFontSize(els, direction) {
+export const changeKerning = bindFeatureCall('font', changeKerningImpl, resolveFontTarget, 'changeKerning')
+
+function changeFontSizeImpl(els, direction) {
   els
     .map(el => showHideSelected(el))
     .map(el => ({
@@ -131,6 +142,8 @@ export function changeFontSize(els, direction) {
       el.style[style] = `${font_size <= 6 ? 6 : font_size}px`)
 }
 
+export const changeFontSize = bindFeatureCall('font', changeFontSizeImpl, resolveFontTarget, 'changeFontSize')
+
 const weightMap = {
   normal: 2,
   bold:   5,
@@ -140,7 +153,7 @@ const weightMap = {
 }
 const weightOptions = [100,200,300,400,500,600,700,800,900]
 
-export function changeFontWeight(els, direction) {
+function changeFontWeightImpl(els, direction) {
   els
     .map(el => showHideSelected(el))
     .map(el => ({
@@ -162,6 +175,8 @@ export function changeFontWeight(els, direction) {
       ])
 }
 
+export const changeFontWeight = bindFeatureCall('font', changeFontWeightImpl, resolveFontTarget, 'changeFontWeight')
+
 const alignMap = {
   start: 0,
   left: 0,
@@ -170,7 +185,7 @@ const alignMap = {
 }
 const alignOptions = ['left','center','right']
 
-export function changeAlignment(els, direction) {
+function changeAlignmentImpl(els, direction) {
   els
     .map(el => showHideSelected(el))
     .map(el => ({
@@ -188,3 +203,5 @@ export function changeAlignment(els, direction) {
     .forEach(({el, style, value}) =>
       el.style[style] = alignOptions[value < 0 ? 0 : value >= 2 ? 2: value])
 }
+
+export const changeAlignment = bindFeatureCall('font', changeAlignmentImpl, resolveFontTarget, 'changeAlignment')

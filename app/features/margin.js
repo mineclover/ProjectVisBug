@@ -1,5 +1,6 @@
 import hotkeys from 'hotkeys-js'
 import { metaKey, getStyle, getSide, showHideSelected } from '../utilities/'
+import { bindFeatureCall } from '../edit-log/feature-bind.js'
 
 const key_events = 'up,down,left,right'
   .split(',')
@@ -34,7 +35,13 @@ export function Margin(visbug) {
   }
 }
 
-export function pushElement(els, direction) {
+function resolveMarginTarget(args) {
+  const [els] = args
+  if (!els?.length) return null
+  return showHideSelected(els[0])
+}
+
+function pushElementImpl(els, direction) {
   els
     .map(el => showHideSelected(el))
     .map(el => ({
@@ -53,6 +60,8 @@ export function pushElement(els, direction) {
     .forEach(({el, style, margin}) =>
       el.style[style] = `${margin < 0 ? 0 : margin}px`)
 }
+
+export const pushElement = bindFeatureCall('margin', pushElementImpl, resolveMarginTarget, 'pushElement')
 
 export function pushAllElementSides(els, keycommand) {
   const combo = keycommand.split('+')

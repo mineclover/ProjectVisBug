@@ -1,19 +1,39 @@
 import { test, expect, changeMode } from '../../tests/helpers.js'
 
-test('padding edit dispatches editlog CustomEvent', async ({ visbugPage }) => {
-  await changeMode({ tool: 'padding', page: visbugPage })
-
-  const eventPromise = visbugPage.evaluate(() => new Promise((resolve) => {
-    document.querySelector('vis-bug').addEventListener('editlog', (e) => resolve(e.detail), { once: true })
-  }))
-
+async function historyAfterEdit(visbugPage, tool, key = 'ArrowUp') {
+  await changeMode({ tool, page: visbugPage })
   await visbugPage.click('[intro] b')
-  await visbugPage.keyboard.press('ArrowUp')
+  await visbugPage.keyboard.press(key)
+  await visbugPage.waitForTimeout(100)
+  return visbugPage.$eval('vis-bug', (el) => el.getHistory())
+}
 
-  const detail = await eventPromise
-  expect(detail.feature).toBe('padding')
-  expect(detail.target).toBeDefined()
-  expect(detail.afterCSS).toBeDefined()
+test('padding edit records feature entry with args', async ({ visbugPage }) => {
+  const history = await historyAfterEdit(visbugPage, 'padding')
+  const feature = history.find((e) => e.source === 'feature' && e.feature === 'padding')
+  expect(feature).toBeDefined()
+  expect(feature.target).toBeDefined()
+  expect(feature.afterCSS).toBeDefined()
+  expect(feature.args[1]).toBe('up')
+})
+
+test('padding edit also records mutation baseline entry', async ({ visbugPage }) => {
+  const history = await historyAfterEdit(visbugPage, 'padding')
+  const sources = history.map((e) => e.source)
+  expect(sources).toContain('feature')
+  expect(sources).toContain('mutation')
+})
+
+test('margin tool records feature source entry', async ({ visbugPage }) => {
+  const history = await historyAfterEdit(visbugPage, 'margin')
+  const feature = history.find((e) => e.source === 'feature' && e.feature === 'margin')
+  expect(feature).toBeDefined()
+})
+
+test('font tool records feature source on font size change', async ({ visbugPage }) => {
+  const history = await historyAfterEdit(visbugPage, 'font')
+  const feature = history.find((e) => e.source === 'feature' && e.feature === 'font')
+  expect(feature).toBeDefined()
 })
 
 test('getHistory returns entries after edits', async ({ visbugPage }) => {

@@ -1,5 +1,6 @@
 import hotkeys from 'hotkeys-js'
 import { metaKey, getStyle, getSide, showHideSelected, expandBorders } from '../utilities/'
+import { bindFeatureCall } from '../edit-log/feature-bind.js'
 
 const key_events = 'up,down,left,right'
   .split(',')
@@ -34,7 +35,13 @@ export function Padding(visbug) {
   }
 }
 
-export function padElement(els, direction) {
+function resolvePaddingTarget(args) {
+  const [els] = args
+  if (!els?.length) return null
+  return showHideSelected(els[0])
+}
+
+function padElementImpl(els, direction) {
   els
     .map(el => showHideSelected(el))
     .map(el => ({
@@ -53,6 +60,8 @@ export function padElement(els, direction) {
     .forEach(({el, style, padding}) =>
       el.style[style] = `${padding < 0 ? 0 : padding}px`)
 }
+
+export const padElement = bindFeatureCall('padding', padElementImpl, resolvePaddingTarget, 'padElement')
 
 export function padAllElementSides(els, keycommand) {
   const combo = keycommand.split('+')
