@@ -11,7 +11,7 @@ test('padding edit dispatches editlog CustomEvent', async ({ visbugPage }) => {
   await visbugPage.keyboard.press('ArrowUp')
 
   const detail = await eventPromise
-  expect(detail.feature === 'padding' || detail.source === 'mutation').toBe(true)
+  expect(detail.feature).toBe('padding')
   expect(detail.target).toBeDefined()
   expect(detail.afterCSS).toBeDefined()
 })

@@ -11,9 +11,18 @@ const TRACKED_PROPS = [
   'box-shadow', 'border-radius',
 ]
 
-export function createMutationWatcher({ root, dispatcher, onWarn = console.warn }) {
+export function createMutationWatcher({ root, dispatcher, resolveFeature, onWarn = console.warn }) {
   let observer = null
   const beforeCache = new WeakMap()
+  const featureFor = () => {
+    try {
+      const name = resolveFeature?.()
+      return typeof name === 'string' && name.length > 0 ? name : 'unknown'
+    } catch (err) {
+      onWarn('editLog: resolveFeature failed', err)
+      return 'unknown'
+    }
+  }
 
   const observerCallback = (mutations) => {
     try {
@@ -26,7 +35,7 @@ export function createMutationWatcher({ root, dispatcher, onWarn = console.warn 
         const ts = Date.now()
         const entry = createEntry({
           target,
-          feature: 'unknown',
+          feature: featureFor(),
           args: { attributeName: m.attributeName },
           beforeCSS: before,
           afterCSS: after,

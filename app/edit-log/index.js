@@ -24,6 +24,7 @@ export function installEditLog(host, opts = {}) {
   const watcher = createMutationWatcher({
     root: document,
     dispatcher,
+    resolveFeature: () => host.active_tool?.dataset?.tool,
     onWarn: opts.onWarn,
   })
 

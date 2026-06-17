@@ -5,6 +5,7 @@
 > - Tests: @playwright/test (e2e, 61/61), vitest (unit, edit-log/panel 42/42)
 > - Node: 20+
 > - **신규: edit-log capture API** — `<vis-bug>` 인스턴스가 사용자 편집을 `EditLogEntry`로 기록하고 `editlog` CustomEvent / `onEditLog` setter / `editLogStream()` AsyncIterable로 노출. `getHistory({merge})` / `clearHistory()` / `replay(entry, {mode})` 메서드 제공. 자세한 내용은 monorepo 측 `packages/visbug-bridge` 참조.
+> - **pnpm workspace**: qa-sdk `vendor/projectvisbug` — 패키지명 `visbug`, `visbug-bridge`가 `workspace:*`로 소비
 > - **신규: `<edit-log-panel>` UI** — Cmd+Shift+L (또는 Ctrl+Shift+L) 토글. CSS / Script / JSON 형식 클립보드 복사.
 > - **Out of scope**: Chrome/Firefox/Safari/Edge extension builds, Xcode VisBug app — 후속 작업 예정
 > - Upstream 환원 의도 없음 (사적 변경)

@@ -36,6 +36,18 @@ describe('createMutationWatcher', () => {
     expect(entries.length).toBeGreaterThan(0)
   })
 
+  it('uses resolveFeature for mutation feature name', async () => {
+    watcher = createMutationWatcher({
+      root: document.body,
+      dispatcher,
+      resolveFeature: () => 'padding',
+    })
+    watcher.start()
+    document.getElementById('x').style.paddingTop = '4px'
+    await flush()
+    expect(dispatcher.getAll()[0].feature).toBe('padding')
+  })
+
   it('stop disconnects observer', async () => {
     watcher = createMutationWatcher({ root: document.body, dispatcher })
     watcher.start()
