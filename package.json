@@ -1,11 +1,17 @@
 {
-  "name": "VisBug",
+  "name": "visbug",
   "version": "0.4.10-fork.0",
   "description": "Forked VisBug for qa-sdk measurement evaluation",
   "author": "Adam Argyle (upstream); qa-sdk fork",
   "license": "Apache-2.0",
   "type": "module",
+  "private": true,
   "main": "app/components/vis-bug/vis-bug.element.js",
+  "exports": {
+    ".": "./app/components/vis-bug/vis-bug.element.js",
+    "./bundle": "./app/bundle.js",
+    "./bundle.css": "./app/bundle.css"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/mineclover/ProjectVisBug.git"
