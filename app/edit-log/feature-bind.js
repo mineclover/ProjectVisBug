@@ -41,3 +41,9 @@ export function resolveFirstSelected(args) {
   const el = els[0]
   return el?.nodeType === 1 ? el : null
 }
+
+/** 단일 Element 인자 (move 등) */
+export function resolveFirstElement(args) {
+  const [el] = args
+  return el?.nodeType === 1 ? el : null
+}

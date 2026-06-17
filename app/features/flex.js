@@ -1,5 +1,6 @@
 import hotkeys from 'hotkeys-js'
 import { metaKey, getStyle } from '../utilities/'
+import { bindFeatureCall, resolveFirstSelected } from '../edit-log/feature-bind.js'
 
 const key_events = 'up,down,left,right'
   .split(',')
@@ -67,7 +68,7 @@ const accountForOtherJustifyContent = (cur, want) => {
 }
 
 // todo: support reversing direction
-export function changeDirection(els, value) {
+function changeDirectionImpl(els, value) {
   els
     .map(ensureFlex)
     .map(el => {
@@ -75,10 +76,12 @@ export function changeDirection(els, value) {
     })
 }
 
+export const changeDirection = bindFeatureCall('flex', changeDirectionImpl, resolveFirstSelected, 'changeDirection')
+
 const h_alignMap      = {normal: 0,'flex-start': 0,'center': 1,'flex-end': 2,}
 const h_alignOptions  = ['flex-start','center','flex-end']
 
-export function changeHAlignment(els, direction) {
+function changeHAlignmentImpl(els, direction) {
   els
     .map(ensureFlex)
     .map(el => ({
@@ -97,10 +100,12 @@ export function changeHAlignment(els, direction) {
       el.style[style] = h_alignOptions[value < 0 ? 0 : value >= 2 ? 2: value])
 }
 
+export const changeHAlignment = bindFeatureCall('flex', changeHAlignmentImpl, resolveFirstSelected, 'changeHAlignment')
+
 const v_alignMap      = {normal: 0,'flex-start': 0,'center': 1,'flex-end': 2,}
 const v_alignOptions  = ['flex-start','center','flex-end']
 
-export function changeVAlignment(els, direction) {
+function changeVAlignmentImpl(els, direction) {
   els
     .map(ensureFlex)
     .map(el => ({
@@ -119,10 +124,12 @@ export function changeVAlignment(els, direction) {
       el.style[style] = v_alignOptions[value < 0 ? 0 : value >= 2 ? 2: value])
 }
 
+export const changeVAlignment = bindFeatureCall('flex', changeVAlignmentImpl, resolveFirstSelected, 'changeVAlignment')
+
 const h_distributionMap      = {normal: 1,'space-around': 0,'': 1,'space-between': 2,}
 const h_distributionOptions  = ['space-around','','space-between']
 
-export function changeHDistribution(els, direction) {
+function changeHDistributionImpl(els, direction) {
   els
     .map(ensureFlex)
     .map(el => ({
@@ -141,10 +148,12 @@ export function changeHDistribution(els, direction) {
       el.style[style] = h_distributionOptions[value < 0 ? 0 : value >= 2 ? 2: value])
 }
 
+export const changeHDistribution = bindFeatureCall('flex', changeHDistributionImpl, resolveFirstSelected, 'changeHDistribution')
+
 const v_distributionMap      = {normal: 1,'space-around': 0,'': 1,'space-between': 2,}
 const v_distributionOptions  = ['space-around','','space-between']
 
-export function changeVDistribution(els, direction) {
+function changeVDistributionImpl(els, direction) {
   els
     .map(ensureFlex)
     .map(el => ({
@@ -163,10 +172,12 @@ export function changeVDistribution(els, direction) {
       el.style[style] = v_distributionOptions[value < 0 ? 0 : value >= 2 ? 2: value])
 }
 
+export const changeVDistribution = bindFeatureCall('flex', changeVDistributionImpl, resolveFirstSelected, 'changeVDistribution')
+
 const orderMap     = {row: 0, 'row-reverse': 1, column: 2, 'column-reverse': 3,}
 const orderOptions = ['row', 'row-reverse', 'column', 'column-reverse']
 
-export function changeOrder(els, direction) {
+function changeOrderImpl(els, direction) {
   els
     .map(ensureFlex)
     .map(el => ({
@@ -183,14 +194,16 @@ export function changeOrder(els, direction) {
           : orderMap[payload.current] === 0 || orderMap[payload.current] === 2
             ? orderMap[payload.current] : orderMap[payload.current] - 1
       }))
-      .forEach(({el, style, value}) =>
-        el.style[style] = orderOptions[value])
+    .forEach(({el, style, value}) =>
+      el.style[style] = orderOptions[value])
 }
+
+export const changeOrder = bindFeatureCall('flex', changeOrderImpl, resolveFirstSelected, 'changeOrder')
 
 const wrapMap     = {nowrap: 0, 'wrap': 1,}
 const wrapOptions = ['nowrap', 'wrap']
 
-export function changeWrap(els, direction) {
+function changeWrapImpl(els, direction) {
   els
     .map(ensureFlex)
     .map(el => ({
@@ -207,6 +220,8 @@ export function changeWrap(els, direction) {
           : wrapMap[payload.current] === 1
             ? wrapMap[payload.current] : wrapMap[payload.current] + 1
       }))
-      .forEach(({el, style, value}) =>
-        el.style[style] = wrapOptions[value])
+    .forEach(({el, style, value}) =>
+      el.style[style] = wrapOptions[value])
 }
+
+export const changeWrap = bindFeatureCall('flex', changeWrapImpl, resolveFirstSelected, 'changeWrap')

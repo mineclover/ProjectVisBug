@@ -2,6 +2,7 @@ import $ from 'blingblingjs'
 import hotkeys from 'hotkeys-js'
 import { getNodeIndex, showEdge, swapElements, notList } from '../utilities/'
 import { toggleWatching } from './imageswap'
+import { bindFeatureCall, resolveFirstElement } from '../edit-log/feature-bind.js'
 
 const key_events = 'up,down,left,right'
 const state = {
@@ -43,7 +44,7 @@ export function Moveable(visbug) {
   }
 }
 
-export function moveElement(el, direction) {
+function moveElementImpl(el, direction) {
   if (!el) return
 
   switch(direction) {
@@ -76,6 +77,8 @@ export function moveElement(el, direction) {
       break
   }
 }
+
+export const moveElement = bindFeatureCall('move', moveElementImpl, resolveFirstElement, 'moveElement')
 
 export const canMoveLeft    = el => el.previousElementSibling
 export const canMoveRight   = el => el.nextElementSibling

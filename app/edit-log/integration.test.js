@@ -36,6 +36,35 @@ test('font tool records feature source on font size change', async ({ visbugPage
   expect(feature).toBeDefined()
 })
 
+test('move tool records feature source entry', async ({ visbugPage }) => {
+  await changeMode({ tool: 'move', page: visbugPage })
+  await visbugPage.click('[intro] b')
+  await visbugPage.keyboard.press('ArrowLeft')
+  await visbugPage.waitForTimeout(100)
+  const history = await visbugPage.$eval('vis-bug', (el) => el.getHistory())
+  const feature = history.find((e) => e.source === 'feature' && e.feature === 'move')
+  expect(feature).toBeDefined()
+  expect(feature.args[1]).toBe('left')
+})
+
+test('flex (align) tool records feature source entry', async ({ visbugPage }) => {
+  const history = await historyAfterEdit(visbugPage, 'align')
+  const feature = history.find((e) => e.source === 'feature' && e.feature === 'flex')
+  expect(feature).toBeDefined()
+})
+
+test('boxshadow tool records feature source entry', async ({ visbugPage }) => {
+  const history = await historyAfterEdit(visbugPage, 'boxshadow', 'ArrowDown')
+  const feature = history.find((e) => e.source === 'feature' && e.feature === 'boxshadow')
+  expect(feature).toBeDefined()
+})
+
+test('position tool records feature source entry', async ({ visbugPage }) => {
+  const history = await historyAfterEdit(visbugPage, 'position')
+  const feature = history.find((e) => e.source === 'feature' && e.feature === 'position')
+  expect(feature).toBeDefined()
+})
+
 test('getHistory returns entries after edits', async ({ visbugPage }) => {
   await changeMode({ tool: 'padding', page: visbugPage })
   await visbugPage.click('[intro] b')

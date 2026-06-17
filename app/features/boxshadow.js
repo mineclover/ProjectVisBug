@@ -1,5 +1,11 @@
 import hotkeys from 'hotkeys-js'
 import { metaKey, getStyle, showHideSelected } from '../utilities/'
+import { bindFeatureCall, resolveFirstSelected } from '../edit-log/feature-bind.js'
+
+function resolveShownTarget(args) {
+  const el = resolveFirstSelected(args)
+  return el ? showHideSelected(el) : null
+}
 
 const key_events = 'up,down,left,right'
   .split(',')
@@ -62,7 +68,7 @@ const propMap = {
 
 const parseCurrentShadow = el => getStyle(el, 'boxShadow').split(' ')
 
-export function changeBoxShadow(els, direction, prop) {
+function changeBoxShadowImpl(els, direction, prop) {
   els
     .map(ensureHasShadow)
     .map(el => showHideSelected(el, 1500))
@@ -112,3 +118,5 @@ export function changeBoxShadow(els, direction, prop) {
     .forEach(({el, style, value}) =>
       el.style[style] = value.join(' '))
 }
+
+export const changeBoxShadow = bindFeatureCall('boxshadow', changeBoxShadowImpl, resolveShownTarget, 'changeBoxShadow')

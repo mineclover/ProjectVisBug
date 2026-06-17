@@ -1,6 +1,11 @@
 import hotkeys from 'hotkeys-js'
-import { metaKey, getStyle, getSide, showHideSelected, expandBorders } from '../utilities/'
-import { bindFeatureCall } from '../edit-log/feature-bind.js'
+import { metaKey, getStyle, getSide, showHideSelected } from '../utilities/'
+import { bindFeatureCall, resolveFirstSelected } from '../edit-log/feature-bind.js'
+
+function resolveShownTarget(args) {
+  const el = resolveFirstSelected(args)
+  return el ? showHideSelected(el) : null
+}
 
 const key_events = 'up,down,left,right'
   .split(',')
@@ -36,9 +41,7 @@ export function Padding(visbug) {
 }
 
 function resolvePaddingTarget(args) {
-  const [els] = args
-  if (!els?.length) return null
-  return showHideSelected(els[0])
+  return resolveShownTarget(args)
 }
 
 function padElementImpl(els, direction) {

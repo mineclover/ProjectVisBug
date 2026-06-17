@@ -1,6 +1,12 @@
 import $ from 'blingblingjs'
 import hotkeys from 'hotkeys-js'
 import { metaKey, getStyle, getSide, showHideSelected } from '../utilities/'
+import { bindFeatureCall, resolveFirstSelected } from '../edit-log/feature-bind.js'
+
+function resolveShownTarget(args) {
+  const el = resolveFirstSelected(args)
+  return el ? showHideSelected(el) : null
+}
 
 const key_events = 'up,down,left,right'
   .split(',')
@@ -162,7 +168,7 @@ export function draggable({el, surface = el, cursor = 'move', clickEvent}) {
   return el
 }
 
-export function positionElement(els, direction) {
+function positionElementImpl(els, direction) {
   els
     .map(el => ensurePositionable(el))
     .map(el => showHideSelected(el))
@@ -183,6 +189,8 @@ export function positionElement(els, direction) {
         ? setTranslateOnSVG(el, direction, position)
         : el.style[style] = position + 'px')
 }
+
+export const positionElement = bindFeatureCall('position', positionElementImpl, resolveShownTarget, 'positionElement')
 
 const extractCurrentValueAndSide = (el, direction) => {
   let style, current
