@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko" data-page-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VisBug edit-log 프리뷰</title>
+  <link rel="stylesheet" href="bundle.css">
+  <link rel="stylesheet" href="demo.css">
+</head>
+<body>
+  <vis-bug color-scheme="light"></vis-bug>
+
+  <div class="demo-shell">
+    <main class="demo-canvas">
+      <h1>edit-log feature-wrapper 프리뷰</h1>
+      <p class="demo-lead">
+        하단 VisBug 툴바로 요소를 선택한 뒤 편집하면 오른쪽 패널에 <code>source: feature</code> 엔트리가 쌓입니다.
+        섹션 테두리가 초록색이면 해당 feature 캡처가 한 번 이상 성공한 것입니다.
+      </p>
+      <p class="demo-hint">
+        <span>내장 패널</span> <kbd>Cmd+Shift+L</kbd>
+        <span>도움말</span> <kbd>?</kbd>
+      </p>
+
+      <div class="demo-theme-bar" role="region" aria-label="테마 설정">
+        <label>
+          페이지
+          <select id="page-theme" aria-label="데모 페이지 밝기">
+            <option value="dark">다크</option>
+            <option value="light">라이트</option>
+          </select>
+        </label>
+        <label>
+          VisBug 툴바
+          <select id="visbug-theme" aria-label="VisBug 툴바 색상">
+            <option value="light">라이트</option>
+            <option value="dark">다크</option>
+            <option value="auto">시스템(auto)</option>
+          </select>
+        </label>
+      </div>
+
+      <section class="demo-section" data-section="padding">
+        <h2><span class="tool-key">padding · p</span> 안쪽 여백</h2>
+        <p>박스 선택 → 방향키</p>
+        <div class="demo-box" data-demo-target>padding</div>
+      </section>
+
+      <section class="demo-section" data-section="margin">
+        <h2><span class="tool-key">margin · m</span> 바깥 여백</h2>
+        <div class="demo-box" data-demo-target>margin</div>
+      </section>
+
+      <section class="demo-section" data-section="font">
+        <h2><span class="tool-key">font · f</span> 타이포그래피</h2>
+        <p><kbd>Cmd+B</kbd> / <kbd>Cmd+I</kbd> 포함</p>
+        <p class="demo-font-sample" data-demo-target><b>편집할 텍스트</b> sample</p>
+      </section>
+
+      <section class="demo-section" data-section="move">
+        <h2><span class="tool-key">move · v</span> 순서 / 드래그 swap</h2>
+        <div class="demo-move-row" data-demo-target>
+          <div class="n1">1</div><div class="n2">2</div><div class="n3">3</div>
+        </div>
+      </section>
+
+      <section class="demo-section" data-section="flex">
+        <h2><span class="tool-key">align · a</span> Flex</h2>
+        <div class="demo-row" data-demo-target style="display:flex; gap:8px; padding:8px; border:1px dashed #2e3348; border-radius:8px;">
+          <span>A</span><span>B</span><span>C</span>
+        </div>
+      </section>
+
+      <section class="demo-section" data-section="position">
+        <h2><span class="tool-key">position · l</span> 위치</h2>
+        <div class="demo-box" data-demo-target style="position:relative; min-height:4rem;">position</div>
+      </section>
+
+      <section class="demo-section" data-section="boxshadow">
+        <h2><span class="tool-key">boxshadow · d</span> 그림자</h2>
+        <div class="demo-box" data-demo-target style="background:#252a3a;">shadow</div>
+      </section>
+
+      <section class="demo-section" data-section="hueshift">
+        <h2><span class="tool-key">hueshift</span> / color 피커</h2>
+        <div class="demo-colors" data-demo-target>
+          <div class="swatch blue filled-circle google-blue">1</div>
+          <div class="swatch red">2</div>
+        </div>
+      </section>
+
+      <section class="demo-section" data-section="text">
+        <h2><span class="tool-key">text · t</span> blur 캡처</h2>
+        <h3 data-demo-target style="margin:0;">시급 ₩100 / 시간</h3>
+      </section>
+
+      <section class="demo-section" data-section="imageswap">
+        <h2><span class="tool-key">imageswap</span> 드래그 교체</h2>
+        <img class="demo-img" data-demo-target alt="swap" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect fill='%237c9cff' width='96' height='96'/%3E%3C/svg%3E">
+      </section>
+    </main>
+
+    <aside class="demo-panel">
+      <header>
+        <h2>edit-log 스트림</h2>
+        <div class="demo-stats">
+          <span class="feature" id="stat-feature">feature 0</span>
+          <span class="mutation" id="stat-mutation">mutation 0</span>
+          <span id="stat-total">total 0</span>
+        </div>
+      </header>
+      <ul class="demo-log" id="log-list">
+        <li class="demo-log-empty">편집 후 엔트리가 여기 표시됩니다.</li>
+      </ul>
+      <footer>
+        <button type="button" id="btn-clear">비우기</button>
+        <button type="button" id="btn-merge">correlated</button>
+        <button type="button" id="btn-panel">툴바</button>
+      </footer>
+    </aside>
+  </div>
+
+  <script src="bundle.js" type="module" defer></script>
+  <script type="module" src="edit-log-demo.js"></script>
+</body>
+</html>

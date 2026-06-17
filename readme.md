@@ -6,6 +6,7 @@
 > - Node: 20+
 > - **edit-log capture API** — `<vis-bug>` 인스턴스가 사용자 편집을 `EditLogEntry`로 기록 (`beforeCSS`/`afterCSS` + optional `beforeDOM`/`afterDOM`). `editlog` CustomEvent / `onEditLog` setter / `editLogStream()` AsyncIterable. `getHistory({merge})` / `clearHistory()` / `replay(entry, {mode:'css'|'feature'|'dom'})`. 상세: monorepo `docs/specs/visbug-bridge/visbug-edit-log.spec.md`
 > - **feature-wrapper** — `feature-bind.js` + `bindFeatureCall()`로 visbug feature export 직접 wrap (`source:'feature'`). text는 `dom-bind`, move drag는 `swapElements` sibling snapshot.
+> - **edit-log 데모** — `pnpm run demo:edit-log` → http://localhost:3000/edit-log-demo.html (monorepo: `make visbug-demo`)
 > - **pnpm workspace**: qa-sdk `vendor/projectvisbug` — 패키지명 `visbug`, `visbug-bridge`가 `workspace:*`로 소비
 > - **신규: `<edit-log-panel>` UI** — Cmd+Shift+L (또는 Ctrl+Shift+L) 토글. CSS / Script / JSON 형식 클립보드 복사.
 > - **Out of scope**: Chrome/Firefox/Safari/Edge extension builds, Xcode VisBug app — 후속 작업 예정
