@@ -1,12 +1,14 @@
-import { createEntry, snapshotComputedStyle } from './entry.js'
+import { createEntry, snapshotComputedStyle, snapshotSwapPair } from './entry.js'
 
-export function wrapFeature({ featureName, original, dispatcher, resolveTarget, props, onWarn = console.warn }) {
+export function wrapFeature({ featureName, original, dispatcher, resolveTarget, props, snapshotDOM, onWarn = console.warn }) {
   return function wrapped(...args) {
     let target = null
     let beforeCSS = {}
+    let beforeDOM = null
     try {
       target = resolveTarget(args)
       if (target) beforeCSS = snapshotComputedStyle(target, props)
+      if (snapshotDOM) beforeDOM = snapshotDOM(target, args)
     } catch (err) {
       onWarn(`editLog[${featureName}]: pre-capture failed`, err)
     }
@@ -19,12 +21,15 @@ export function wrapFeature({ featureName, original, dispatcher, resolveTarget, 
         return result
       }
       const afterCSS = snapshotComputedStyle(target, props)
+      const afterDOM = snapshotDOM ? snapshotDOM(target, args) : null
       const entry = createEntry({
         target,
         feature: featureName,
         args,
         beforeCSS,
         afterCSS,
+        beforeDOM,
+        afterDOM,
         source: 'feature',
         ts: Date.now(),
       })
@@ -35,4 +40,10 @@ export function wrapFeature({ featureName, original, dispatcher, resolveTarget, 
 
     return result
   }
+}
+
+export function snapshotSwapDOM(_target, args) {
+  const [src, tgt] = args
+  if (!src?.parentNode || !tgt?.parentNode) return null
+  return snapshotSwapPair(src, tgt)
 }

@@ -14,13 +14,14 @@ describe('feature-bind', () => {
   beforeEach(() => {
     document.body.innerHTML = '<div id="x"></div>'
     dispatcher = createDispatcher()
-    setFeatureWrapper((name, original, resolveTarget) =>
+    setFeatureWrapper((name, original, resolveTarget, opts = {}) =>
       wrapFeature({
         featureName: name,
         original,
         dispatcher,
         resolveTarget,
         props: ['padding-top'],
+        snapshotDOM: opts.snapshotDOM ?? null,
       }))
   })
 

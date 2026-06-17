@@ -52,3 +52,17 @@ describe('replay feature mode', () => {
     expect(result.reason).toBe('feature-replay-failed')
   })
 })
+
+describe('replay dom mode', () => {
+  it('applies afterDOM.textContent', () => {
+    document.body.innerHTML = '<p id="t">old</p>'
+    const result = replay({
+      ...mkEntry({ feature: 'text' }),
+      target: { selector: '#t', nodePath: 'p[0]', weakRef: null },
+      beforeDOM: { textContent: 'old' },
+      afterDOM: { textContent: 'new' },
+    }, { mode: 'dom' })
+    expect(result.ok).toBe(true)
+    expect(document.getElementById('t').textContent).toBe('new')
+  })
+})

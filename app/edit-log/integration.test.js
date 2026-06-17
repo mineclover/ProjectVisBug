@@ -1,4 +1,4 @@
-import { test, expect, changeMode } from '../../tests/helpers.js'
+import { test, expect, changeMode, metaKey } from '../../tests/helpers.js'
 
 async function historyAfterEdit(visbugPage, tool, key = 'ArrowUp') {
   await changeMode({ tool, page: visbugPage })
@@ -63,6 +63,60 @@ test('position tool records feature source entry', async ({ visbugPage }) => {
   const history = await historyAfterEdit(visbugPage, 'position')
   const feature = history.find((e) => e.source === 'feature' && e.feature === 'position')
   expect(feature).toBeDefined()
+})
+
+test('hueshift tool records feature source entry', async ({ visbugPage }) => {
+  await changeMode({ tool: 'hueshift', page: visbugPage })
+  await visbugPage.locator('.filled-circle.google-blue').scrollIntoViewIfNeeded()
+  await visbugPage.click('.filled-circle.google-blue')
+  await visbugPage.keyboard.press('ArrowLeft')
+  await visbugPage.waitForTimeout(100)
+  const history = await visbugPage.$eval('vis-bug', (el) => el.getHistory())
+  const feature = history.find((e) => e.source === 'feature' && e.feature === 'hueshift')
+  expect(feature).toBeDefined()
+})
+
+test('color picker records feature source on foreground change', async ({ visbugPage }) => {
+  await changeMode({ tool: 'hueshift', page: visbugPage })
+  await visbugPage.click('[intro] b')
+  await visbugPage.evaluate(() => {
+    const visbug = document.querySelector('vis-bug')
+    const input = visbug.$shadow.querySelector('#foreground input')
+    input.value = '#ff0000'
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+  })
+  await visbugPage.waitForTimeout(100)
+  const history = await visbugPage.$eval('vis-bug', (el) => el.getHistory())
+  const feature = history.find((e) => e.source === 'feature' && e.feature === 'color')
+  expect(feature).toBeDefined()
+  expect(feature.args[1]).toBe('#ff0000')
+})
+
+test('font bold hotkey records feature source entry', async ({ visbugPage }) => {
+  await changeMode({ tool: 'font', page: visbugPage })
+  await visbugPage.click('[intro] b')
+  const key = await metaKey(visbugPage)
+  await visbugPage.keyboard.down(key)
+  await visbugPage.keyboard.press('b')
+  await visbugPage.keyboard.up(key)
+  await visbugPage.waitForTimeout(100)
+  const history = await visbugPage.$eval('vis-bug', (el) => el.getHistory())
+  const feature = history.find(
+    (e) => e.source === 'feature' && e.feature === 'font' && e.args.length === 1,
+  )
+  expect(feature).toBeDefined()
+})
+
+test('text tool records feature source on blur', async ({ visbugPage }) => {
+  await changeMode({ tool: 'text', page: visbugPage })
+  await visbugPage.click('[intro] b')
+  await visbugPage.keyboard.type('!')
+  await visbugPage.click('article')
+  await visbugPage.waitForTimeout(100)
+  const history = await visbugPage.$eval('vis-bug', (el) => el.getHistory())
+  const feature = history.find((e) => e.source === 'feature' && e.feature === 'text')
+  expect(feature).toBeDefined()
+  expect(feature.afterDOM?.textContent).toBeDefined()
 })
 
 test('getHistory returns entries after edits', async ({ visbugPage }) => {

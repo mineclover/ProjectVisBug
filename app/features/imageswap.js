@@ -1,5 +1,6 @@
 import $ from 'blingblingjs'
 import { getStyle } from '../utilities/'
+import { bindFeatureCall, resolveFirstElement } from '../edit-log/feature-bind.js'
 
 let imgs      = []
   , overlays  = []
@@ -145,7 +146,7 @@ const updateContentImages = (images, srcs) => {
   })
 }
 
-const updateContentImage = (img, src) => {
+function updateContentImageImpl(img, src) {
   img.src = src
   if (img.srcset !== '')
     img.srcset = src
@@ -157,16 +158,22 @@ const updateContentImage = (img, src) => {
       source.srcset = src)
 }
 
+export const updateContentImage = bindFeatureCall('imageswap', updateContentImageImpl, resolveFirstElement, 'updateContentImage')
+
+function applyBackgroundImageImpl(img, src) {
+  clearDragHistory(img)
+  if (window.getComputedStyle(img).backgroundImage != 'none')
+    img.style.backgroundImage = `url(${src})`
+}
+
+export const applyBackgroundImage = bindFeatureCall('imageswap', applyBackgroundImageImpl, resolveFirstElement, 'applyBackgroundImage')
+
 const getTargetBackgroundImages = (images, e) =>
   images.filter(img =>
     img.contains(e.target))
 
 const updateBackgroundImages = (images, src) =>
-  images.forEach(img => {
-    clearDragHistory(img)
-    if (window.getComputedStyle(img).backgroundImage != 'none')
-      img.style.backgroundImage = `url(${src})`
-  })
+  images.forEach(img => applyBackgroundImage(img, src))
 
 const getPictureSourcesToUpdate = img =>
   Array.from(img.parentElement.children)

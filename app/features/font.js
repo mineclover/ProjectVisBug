@@ -37,19 +37,13 @@ export function Font({selection}) {
   })
 
   hotkeys('cmd+b', e => {
-    selection().forEach(el =>
-      el.style.fontWeight =
-        el.style.fontWeight == 'bold'
-          ? null
-          : 'bold')
+    e.preventDefault()
+    toggleFontWeightBold(selection())
   })
 
   hotkeys('cmd+i', e => {
-    selection().forEach(el =>
-      el.style.fontStyle =
-        el.style.fontStyle == 'italic'
-          ? null
-          : 'italic')
+    e.preventDefault()
+    toggleFontStyleItalic(selection())
   })
 
   return () => {
@@ -205,3 +199,18 @@ function changeAlignmentImpl(els, direction) {
 }
 
 export const changeAlignment = bindFeatureCall('font', changeAlignmentImpl, resolveFontTarget, 'changeAlignment')
+
+function toggleFontWeightBoldImpl(els) {
+  els.forEach(el => {
+    el.style.fontWeight = el.style.fontWeight == 'bold' ? null : 'bold'
+  })
+}
+
+function toggleFontStyleItalicImpl(els) {
+  els.forEach(el => {
+    el.style.fontStyle = el.style.fontStyle == 'italic' ? null : 'italic'
+  })
+}
+
+export const toggleFontWeightBold = bindFeatureCall('font', toggleFontWeightBoldImpl, resolveFontTarget, 'toggleFontWeightBold')
+export const toggleFontStyleItalic = bindFeatureCall('font', toggleFontStyleItalicImpl, resolveFontTarget, 'toggleFontStyleItalic')

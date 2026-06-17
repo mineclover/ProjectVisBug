@@ -3,6 +3,9 @@ import {
   computeNodePath,
   snapshotComputedStyle,
   diffSnapshots,
+  diffDomSnapshots,
+  snapshotTextContent,
+  snapshotSwapPair,
   computeCorrelationId,
   createEntry,
 } from './entry.js'
@@ -90,5 +93,48 @@ describe('createEntry', () => {
     expect(entry.target.nodePath).toMatch(/p/)
     expect(entry.target.weakRef).toBeInstanceOf(WeakRef)
     expect(entry.correlationId).toBeDefined()
+  })
+
+  it('includes beforeDOM/afterDOM for text edits', () => {
+    document.body.innerHTML = '<p id="t">hi</p>'
+    const target = document.getElementById('t')
+    const entry = createEntry({
+      target,
+      feature: 'text',
+      args: ['hi', 'hello'],
+      beforeCSS: {},
+      afterCSS: {},
+      beforeDOM: { textContent: 'hi' },
+      afterDOM: { textContent: 'hello' },
+      source: 'feature',
+      ts: 1700000000000,
+    })
+    expect(entry.beforeDOM.textContent).toBe('hi')
+    expect(entry.afterDOM.textContent).toBe('hello')
+    expect(entry.correlationId).toContain('dom')
+  })
+})
+
+describe('snapshotTextContent', () => {
+  it('captures textContent', () => {
+    document.body.innerHTML = '<span>abc</span>'
+    expect(snapshotTextContent(document.querySelector('span'))).toEqual({ textContent: 'abc' })
+  })
+})
+
+describe('snapshotSwapPair', () => {
+  it('captures sibling indices', () => {
+    document.body.innerHTML = '<div><em></em><b></b></div>'
+    const [em, b] = document.querySelectorAll('em, b')
+    const snap = snapshotSwapPair(em, b)
+    expect(snap.src.index).toBe(0)
+    expect(snap.target.index).toBe(1)
+  })
+})
+
+describe('diffDomSnapshots', () => {
+  it('detects dom changes', () => {
+    expect(diffDomSnapshots({ textContent: 'a' }, { textContent: 'b' })).toEqual(['dom'])
+    expect(diffDomSnapshots({ textContent: 'a' }, { textContent: 'a' })).toEqual([])
   })
 })

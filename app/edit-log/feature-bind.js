@@ -17,18 +17,18 @@ export function clearFeatureBindings() {
 }
 
 /**
- * Feature 모듈 export용 — edit-log가 활성화되면 wrapFeature로 감싼 호출, 아니면 original.
- * @param {string} featureName — FEATURE_PROP_MAP 키 (padding, margin, font, …)
+ * @param {string} featureName
  * @param {Function} original
  * @param {(args: unknown[]) => Element | null} resolveTarget
- * @param {string} [cacheKey] — 동일 featureName 내 여러 함수 구분용
+ * @param {string} [cacheKey]
+ * @param {((target: Element, args: unknown[]) => object | null) | null} [snapshotDOM]
  */
-export function bindFeatureCall(featureName, original, resolveTarget, cacheKey = featureName) {
+export function bindFeatureCall(featureName, original, resolveTarget, cacheKey = featureName, snapshotDOM = null) {
   return function bound(...args) {
     if (!wrapFeatureFn) return original.apply(this, args)
     const key = `${featureName}:${cacheKey}`
     if (!cache.has(key)) {
-      cache.set(key, wrapFeatureFn(featureName, original, resolveTarget))
+      cache.set(key, wrapFeatureFn(featureName, original, resolveTarget, { snapshotDOM }))
     }
     return cache.get(key).apply(this, args)
   }

@@ -4,12 +4,14 @@ import { wrapFeature } from './feature-wrapper.js'
 import { mergeByCorrelationId } from './merge.js'
 import { toCSS, toScript, toJSON } from './formatters.js'
 import { replay } from './replay.js'
+import { createEntry } from './entry.js'
+import { setDomEntryPusher, clearDomBindings } from './dom-bind.js'
 
 const FEATURE_PROP_MAP = {
   padding: ['padding-top', 'padding-right', 'padding-bottom', 'padding-left'],
   margin: ['margin-top', 'margin-right', 'margin-bottom', 'margin-left'],
   font: ['font-size', 'font-family', 'font-weight', 'line-height', 'color'],
-  text: ['color'],
+  text: [],
   move: ['top', 'right', 'bottom', 'left', 'transform'],
   flex: ['display', 'flex-direction', 'justify-content', 'align-items', 'gap'],
   position: ['position', 'top', 'right', 'bottom', 'left'],
@@ -37,6 +39,14 @@ export function installEditLog(host, opts = {}) {
   })
 
   watcher.start()
+
+  setDomEntryPusher((partial) => {
+    dispatcher.push(createEntry({
+      ...partial,
+      source: 'feature',
+      ts: Date.now(),
+    }))
+  })
 
   Object.defineProperty(host, 'onEditLog', {
     configurable: true,
@@ -77,16 +87,18 @@ export function installEditLog(host, opts = {}) {
   host._editLogFormatters = { toCSS, toScript, toJSON }
 
   return {
-    wrapFeatureFn: (featureName, original, resolveTarget) =>
+    wrapFeatureFn: (featureName, original, resolveTarget, opts = {}) =>
       wrapFeature({
         featureName,
         original,
         dispatcher,
         resolveTarget,
         props: FEATURE_PROP_MAP[featureName] || [],
+        snapshotDOM: opts.snapshotDOM ?? null,
         onWarn: opts.onWarn,
       }),
     teardown: () => {
+      clearDomBindings()
       watcher.stop()
       dispatcher.clear()
       delete host.onEditLog

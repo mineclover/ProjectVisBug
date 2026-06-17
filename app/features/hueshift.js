@@ -3,6 +3,12 @@ import hotkeys from 'hotkeys-js'
 import { TinyColor } from '@ctrl/tinycolor'
 
 import { metaKey, getStyle, showHideSelected } from '../utilities/'
+import { bindFeatureCall, resolveFirstSelected } from '../edit-log/feature-bind.js'
+
+function resolveShownTarget(args) {
+  const el = resolveFirstSelected(args)
+  return el ? showHideSelected(el) : null
+}
 
 const key_events = 'up,down,left,right'
   .split(',')
@@ -24,7 +30,6 @@ export function HueShift({Color:ColorTool, Visbug}) {
 
   Visbug.onSelectedUpdate(elements => {
     state.elements = elements
-    ColorTool.setActive(state.active_color)
   })
 
   hotkeys(key_events, (e, handler) => {
@@ -32,7 +37,7 @@ export function HueShift({Color:ColorTool, Visbug}) {
 
     e.preventDefault()
 
-    let selectedNodes = state.elements
+    let selectedNodes = Visbug.selection()
       , keys = handler.key.split('+')
 
     keys.includes('left') || keys.includes('right')
@@ -44,8 +49,8 @@ export function HueShift({Color:ColorTool, Visbug}) {
     e.preventDefault()
     let keys = handler.key.split('+')
     keys.includes('left') || keys.includes('right')
-      ? changeHue(state.elements, keys, 'a', ColorTool)
-      : changeHue(state.elements, keys, 'h', ColorTool)
+      ? changeHue(Visbug.selection(), keys, 'a', ColorTool)
+      : changeHue(Visbug.selection(), keys, 'h', ColorTool)
   })
 
   hotkeys(']', (e, handler) => {
@@ -77,7 +82,7 @@ export function HueShift({Color:ColorTool, Visbug}) {
   }
 }
 
-export function changeHue(els, direction, prop, ColorTool) {
+function changeHueImpl(els, direction, prop, ColorTool) {
   els
     .map(el => showHideSelected(el))
     .map(el => {
@@ -123,6 +128,8 @@ export function changeHue(els, direction, prop, ColorTool) {
       if (style == 'backgroundColor') ColorTool.background.color(color.toHslString())
     })
 }
+
+export const changeHue = bindFeatureCall('hueshift', changeHueImpl, resolveShownTarget, 'changeHue')
 
 export function extractPalleteColors(el) {
   if (el instanceof SVGElement) {

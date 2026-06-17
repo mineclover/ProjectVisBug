@@ -47,5 +47,19 @@ export function replay(entry, { mode = 'css', registry } = {}) {
     }
   }
 
+  if (mode === 'dom') {
+    const target = resolveTarget(entry)
+    if (!target) return { ok: false, reason: 'target-not-found' }
+    try {
+      if (entry.afterDOM?.textContent != null) {
+        target.textContent = entry.afterDOM.textContent
+        return { ok: true }
+      }
+      return { ok: false, reason: 'dom-replay-unsupported' }
+    } catch (cause) {
+      return { ok: false, reason: 'dom-apply-failed', cause }
+    }
+  }
+
   return { ok: false, reason: 'unknown-mode' }
 }

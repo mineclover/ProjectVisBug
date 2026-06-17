@@ -5,6 +5,7 @@ export default defineConfig({
     include: [
       'app/edit-log/**/*.spec.js',
       'app/components/edit-log-panel/**/*.spec.js',
+      'app/features/**/*.wrap.spec.js',
     ],
     environment: 'jsdom',
     globals: false,

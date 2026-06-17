@@ -1,8 +1,9 @@
 import $ from 'blingblingjs'
 import hotkeys from 'hotkeys-js'
-import { getNodeIndex, showEdge, swapElements, notList } from '../utilities/'
+import { getNodeIndex, showEdge, swapElements as swapElementsImpl, notList } from '../utilities/'
 import { toggleWatching } from './imageswap'
 import { bindFeatureCall, resolveFirstElement } from '../edit-log/feature-bind.js'
+import { snapshotSwapDOM } from '../edit-log/feature-wrapper.js'
 
 const key_events = 'up,down,left,right'
 const state = {
@@ -79,6 +80,14 @@ function moveElementImpl(el, direction) {
 }
 
 export const moveElement = bindFeatureCall('move', moveElementImpl, resolveFirstElement, 'moveElement')
+
+export const swapElements = bindFeatureCall(
+  'move',
+  swapElementsImpl,
+  resolveFirstElement,
+  'swapElements',
+  snapshotSwapDOM,
+)
 
 export const canMoveLeft    = el => el.previousElementSibling
 export const canMoveRight   = el => el.nextElementSibling

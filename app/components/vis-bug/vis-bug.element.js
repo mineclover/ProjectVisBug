@@ -31,6 +31,7 @@ import {
 
 import { installEditLog } from '../../edit-log/index.js'
 import { setFeatureWrapper, clearFeatureBindings } from '../../edit-log/feature-bind.js'
+import { clearDomBindings } from '../../edit-log/dom-bind.js'
 import '../edit-log-panel/edit-log-panel.element.js'
 
 export default class VisBug extends HTMLElement {
@@ -109,6 +110,7 @@ export default class VisBug extends HTMLElement {
 
   disconnectedCallback() {
     clearFeatureBindings()
+    clearDomBindings()
     this._editLog?.teardown()
     this._editLogPanel?.remove()
     if (this._editLogPanelRefresh) this.removeEventListener('editlog', this._editLogPanelRefresh)
