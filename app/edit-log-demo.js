@@ -64,6 +64,7 @@ function markSection(feature) {
 }
 
 function prependEntry(entry) {
+  if (entry.source !== 'feature') return
   if (entry.source === 'feature') featureCount++
   else mutationCount++
   statFeature.textContent = `feature ${featureCount}`
@@ -77,12 +78,37 @@ function prependEntry(entry) {
   while (logEl.children.length > 40) logEl.lastChild?.remove()
 }
 
+const LAYOUT_STYLE_PROPS = ['position', 'top', 'left', 'width', 'height', 'transform', 'box-sizing']
+
+function resetDemoLayout(visbug) {
+  document.querySelectorAll('.demo-section, .demo-box, [data-demo-target]').forEach((el) => {
+    LAYOUT_STYLE_PROPS.forEach((prop) => el.style.removeProperty(prop))
+    el.removeAttribute('data-selected')
+    el.removeAttribute('data-selected-hide')
+    el.removeAttribute('data-label-id')
+  })
+  document.querySelectorAll('visbug-handles, visbug-label').forEach((el) => el.remove())
+  visbug?.clearHistory?.()
+}
+
 export function wireEditLogDemo(visbug) {
   if (!visbug) return
 
   wireThemeControls(visbug)
 
   visbug.addEventListener('editlog', (e) => prependEntry(e.detail))
+
+  document.getElementById('btn-reset-layout')?.addEventListener('click', () => {
+    resetDemoLayout(visbug)
+    logEl.innerHTML = '<div class="demo-log-empty">편집 후 엔트리가 여기 표시됩니다.</div>'
+    featureCount = 0
+    mutationCount = 0
+    seenFeatures.clear()
+    statFeature.textContent = 'feature 0'
+    statMutation.textContent = 'mutation 0'
+    statTotal.textContent = 'total 0'
+    document.querySelectorAll('.demo-section.done').forEach((el) => el.classList.remove('done'))
+  })
 
   document.getElementById('btn-clear')?.addEventListener('click', () => {
     visbug.clearHistory()

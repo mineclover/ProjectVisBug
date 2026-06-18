@@ -110,6 +110,28 @@ html, body {
   font-size: 0.78rem;
 }
 
+.demo-box,
+[data-demo-target] {
+  outline: 1px dashed rgba(124, 156, 255, 0.35);
+  outline-offset: 2px;
+}
+
+.demo-section[data-selected] {
+  outline: 2px solid #f0b429;
+  outline-offset: 2px;
+}
+
+.demo-section[data-selected]::before {
+  content: 'section 선택됨 — 안쪽 점선 박스를 선택하세요';
+  display: block;
+  margin: 0 0 0.5rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.78rem;
+  color: #b7791f;
+  background: rgba(240, 180, 41, 0.12);
+  border-radius: 6px;
+}
+
 .demo-section {
   background: var(--demo-surface);
   border: 1px solid var(--demo-border);
@@ -302,15 +324,22 @@ html, body {
   color: var(--demo-accent);
 }
 
-.demo-panel footer {
+.demo-panel footer,
+.demo-panel-actions {
   padding: 0.65rem 1rem;
   border-top: 1px solid var(--demo-border);
   display: flex;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.demo-panel footer button,
+.demo-panel-actions button {
+  flex: 1 1 auto;
+  min-width: 5.5rem;
 }
 
 .demo-panel button {
-  flex: 1;
   border: 1px solid var(--demo-border);
   background: var(--demo-surface);
   color: var(--demo-text);

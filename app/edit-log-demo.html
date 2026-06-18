@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>VisBug edit-log 프리뷰</title>
-  <link rel="stylesheet" href="bundle.css">
+  <link rel="stylesheet" href="edit-log-demo.bundle.css">
   <link rel="stylesheet" href="demo.css">
 </head>
 <body>
@@ -20,6 +20,7 @@
       <p class="demo-hint">
         <span>내장 패널</span> <kbd>Cmd+Shift+L</kbd>
         <span>도움말</span> <kbd>?</kbd>
+        <span>선택</span> 안쪽 <strong>점선 박스</strong>(<code>.demo-box</code>)
       </p>
 
       <div class="demo-theme-bar" role="region" aria-label="테마 설정">
@@ -42,13 +43,13 @@
 
       <section class="demo-section" data-section="padding">
         <h2><span class="tool-key">padding · p</span> 안쪽 여백</h2>
-        <p>박스 선택 → 방향키</p>
-        <div class="demo-box" data-demo-target>padding</div>
+        <p>아래 박스 선택 → <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> (Shift=전체 면)</p>
+        <div class="demo-box demo-pad" data-demo-target>padding</div>
       </section>
 
       <section class="demo-section" data-section="margin">
         <h2><span class="tool-key">margin · m</span> 바깥 여백</h2>
-        <div class="demo-box" data-demo-target>margin</div>
+        <div class="demo-box demo-margin" data-demo-target>margin</div>
       </section>
 
       <section class="demo-section" data-section="font">
@@ -66,7 +67,7 @@
 
       <section class="demo-section" data-section="flex">
         <h2><span class="tool-key">align · a</span> Flex</h2>
-        <div class="demo-row" data-demo-target style="display:flex; gap:8px; padding:8px; border:1px dashed #2e3348; border-radius:8px;">
+        <div class="demo-row" data-demo-target style="display:flex; gap:8px; padding:8px; border:1px dashed var(--demo-border); border-radius:8px;">
           <span>A</span><span>B</span><span>C</span>
         </div>
       </section>
@@ -83,20 +84,28 @@
 
       <section class="demo-section" data-section="hueshift">
         <h2><span class="tool-key">hueshift</span> / color 피커</h2>
+        <p>스와치 선택 → 방향키로 채도/색조 조절</p>
         <div class="demo-colors" data-demo-target>
-          <div class="swatch blue filled-circle google-blue">1</div>
+          <div class="swatch blue">1</div>
           <div class="swatch red">2</div>
+          <div class="swatch yellow">3</div>
         </div>
       </section>
 
       <section class="demo-section" data-section="text">
         <h2><span class="tool-key">text · t</span> blur 캡처</h2>
-        <h3 data-demo-target style="margin:0;">시급 ₩100 / 시간</h3>
+        <h3 data-demo-target style="margin:0; font-size:1.1rem;">시급 ₩100 / 시간</h3>
       </section>
 
       <section class="demo-section" data-section="imageswap">
         <h2><span class="tool-key">imageswap</span> 드래그 교체</h2>
-        <img class="demo-img" data-demo-target alt="swap" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect fill='%237c9cff' width='96' height='96'/%3E%3C/svg%3E">
+        <p>이미지 선택 후 파일/이미지 드래그앤드롭</p>
+        <img
+          class="demo-img"
+          data-demo-target
+          alt="swap me"
+          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect fill='%237c9cff' width='96' height='96'/%3E%3Ctext x='48' y='54' text-anchor='middle' fill='white' font-size='14'%3Eimg%3C/text%3E%3C/svg%3E"
+        >
       </section>
     </main>
 
@@ -112,7 +121,8 @@
       <ul class="demo-log" id="log-list">
         <li class="demo-log-empty">편집 후 엔트리가 여기 표시됩니다.</li>
       </ul>
-      <footer>
+      <footer class="demo-panel-actions">
+        <button type="button" id="btn-reset-layout">레이아웃 초기화</button>
         <button type="button" id="btn-clear">비우기</button>
         <button type="button" id="btn-merge">correlated</button>
         <button type="button" id="btn-panel">툴바</button>
@@ -121,6 +131,12 @@
   </div>
 
   <script src="bundle.js" type="module" defer></script>
-  <script type="module" src="edit-log-demo.js"></script>
+  <script type="module">
+    import { wireEditLogDemo } from './edit-log-demo.js'
+
+    customElements.whenDefined('vis-bug').then(() => {
+      wireEditLogDemo(document.querySelector('vis-bug'))
+    })
+  </script>
 </body>
 </html>

@@ -18,6 +18,7 @@ import {
   isSelectorValid, findNearestChildElement, findNearestParentElement,
   getTextShadowValues, isFixed, onRemove
 } from '../utilities/'
+import { queryTargets } from '../dom-ref/index.js'
 
 export function Selectable(visbug) {
   const page              = document.body
@@ -438,6 +439,7 @@ export function Selectable(visbug) {
 
     el.setAttribute('data-selected', true)
     el.setAttribute('data-label-id', id)
+    visbug.targetRegistry?.register?.(el, { labelId: id })
 
     clearHover()
 
@@ -778,6 +780,7 @@ export function Selectable(visbug) {
   return {
     select,
     selection,
+    queryTargets,
     unselect_all,
     onSelectedUpdate,
     removeSelectedCallback,

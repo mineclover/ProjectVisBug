@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { replay } from './replay.js'
+import { buildDomRefCatalog } from '../dom-ref/index.js'
 
 const mkEntry = (overrides = {}) => ({
   id: 'x', ts: 1, feature: 'padding', args: ['#x', 4],
@@ -26,6 +27,23 @@ describe('replay css mode', () => {
     const result = replay(mkEntry(), { mode: 'css' })
     expect(result.ok).toBe(false)
     expect(result.reason).toBe('target-not-found')
+  })
+
+  it('resolves target through DomRef catalog when selector is unavailable', () => {
+    const target = document.getElementById('x')
+    const catalog = buildDomRefCatalog(target)
+    const result = replay(mkEntry({
+      target: {
+        selector: '__not_a_valid_selector__',
+        nodePath: 'div[0]',
+        catalog,
+        primary: catalog.primary,
+        weakRef: null,
+      },
+    }), { mode: 'css' })
+
+    expect(result.ok).toBe(true)
+    expect(target.style.paddingTop).toBe('4px')
   })
 
   it('warns on agreement===false', () => {

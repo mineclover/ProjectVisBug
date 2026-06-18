@@ -1,3 +1,5 @@
+import { resolveDomRef } from '../dom-ref/index.js'
+
 function resolveTarget(entry) {
   const ref = entry.target?.weakRef
   if (ref) {
@@ -6,6 +8,10 @@ function resolveTarget(entry) {
   }
   if (entry.target?.selector) {
     const found = document.querySelector(entry.target.selector)
+    if (found) return found
+  }
+  if (entry.target?.catalog) {
+    const found = resolveDomRef(entry.target.catalog)
     if (found) return found
   }
   return null

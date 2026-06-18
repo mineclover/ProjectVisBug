@@ -17,11 +17,11 @@ test('padding edit records feature entry with args', async ({ visbugPage }) => {
   expect(feature.args[1]).toBe('up')
 })
 
-test('padding edit also records mutation baseline entry', async ({ visbugPage }) => {
+test('padding edit suppresses redundant mutation when feature is captured', async ({ visbugPage }) => {
   const history = await historyAfterEdit(visbugPage, 'padding')
   const sources = history.map((e) => e.source)
   expect(sources).toContain('feature')
-  expect(sources).toContain('mutation')
+  expect(sources).not.toContain('mutation')
 })
 
 test('margin tool records feature source entry', async ({ visbugPage }) => {

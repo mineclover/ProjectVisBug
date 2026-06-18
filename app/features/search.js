@@ -4,6 +4,7 @@ import { querySelectorAllDeep } from 'query-selector-shadow-dom'
 import { PluginRegistry, PluginHints } from '../plugins/_registry'
 import { notList } from '../utilities'
 import { isFirefox } from '../utilities/cross-browser.js'
+import { queryTargets } from '../dom-ref/index.js'
 
 let SelectorEngine
 
@@ -103,8 +104,12 @@ export function queryPage(query, fn) {
   if (query == '.' || query == '#' || query.trim().endsWith(',')) return
 
   try {
-    let matches = querySelectorAllDeep(query + notList)
-    if (!matches.length) matches = querySelectorAllDeep(query)
+    const queryApi = SelectorEngine?.queryTargets ?? ((spec) => queryTargets(spec))
+    let matches = queryApi({ by: 'css', value: query })
+    if (!matches.length && !SelectorEngine?.queryTargets) {
+      matches = querySelectorAllDeep(query + notList)
+      if (!matches.length) matches = querySelectorAllDeep(query)
+    }
     if (matches.length) {
       matches.forEach(el =>
         fn

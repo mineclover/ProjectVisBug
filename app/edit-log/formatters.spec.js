@@ -34,6 +34,51 @@ describe('toCSS', () => {
     const css = toCSS([bad, good])
     expect(css).toContain('#z')
   })
+
+  it('prefers CSS-compatible DomRef primary over legacy selector', () => {
+    const css = toCSS([
+      mkEntry({
+        target: {
+          selector: '#stale',
+          nodePath: 'section[0]',
+          primary: {
+            kind: 'attr',
+            value: '[data-testid="hero"]',
+            matchCount: 1,
+            stability: 95,
+          },
+        },
+      }),
+    ])
+    expect(css).toContain('[data-testid="hero"] {')
+    expect(css).not.toContain('#stale')
+  })
+
+  it('falls back to CSS-compatible catalog symbol when primary is xpath', () => {
+    const css = toCSS([
+      mkEntry({
+        target: {
+          selector: '/html[1]/body[1]/section[1]',
+          nodePath: 'section[0]',
+          primary: {
+            kind: 'xpath',
+            value: '/html[1]/body[1]/section[1]',
+            matchCount: 1,
+            stability: 100,
+          },
+          catalog: {
+            canonical: { kind: 'xpath', value: '/html[1]/body[1]/section[1]' },
+            symbols: [
+              { kind: 'xpath', value: '/html[1]/body[1]/section[1]', matchCount: 1, stability: 100 },
+              { kind: 'css', value: 'section.hero', matchCount: 1, stability: 75 },
+            ],
+          },
+        },
+      }),
+    ])
+    expect(css).toContain('section.hero {')
+    expect(css).not.toContain('/html')
+  })
 })
 
 describe('toScript', () => {

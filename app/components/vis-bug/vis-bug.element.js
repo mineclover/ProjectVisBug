@@ -53,6 +53,9 @@ export default class VisBug extends HTMLElement {
   connectedCallback() {
     this._editLog = installEditLog(this, {
       bufferSize: 1000,
+      contentRoot: this.parentElement ?? document.body,
+      mutationScope: 'page-edits',
+      resolveDomRefSymbols: this.resolveDomRefSymbols,
       onWarn: (...args) => console.warn('[vis-bug edit-log]', ...args),
     })
     setFeatureWrapper(this._editLog.wrapFeatureFn)
@@ -62,7 +65,7 @@ export default class VisBug extends HTMLElement {
     document.body.appendChild(this._editLogPanel)
 
     this._editLogPanelRefresh = () => {
-      this._editLogPanel.entries = this.getHistory({ merge: 'correlated' })
+      this._editLogPanel.entries = this.getHistory({ merge: 'intent' })
     }
     this.addEventListener('editlog', this._editLogPanelRefresh)
 
@@ -73,7 +76,7 @@ export default class VisBug extends HTMLElement {
 
     this._editLogPanel.addEventListener('edit-log-copy', async (e) => {
       const fmts = this._editLogFormatters
-      const merged = this.getHistory({ merge: 'correlated' })
+      const merged = this.getHistory({ merge: 'intent' })
       const text =
         e.detail.format === 'css' ? fmts.toCSS(merged) :
         e.detail.format === 'script' ? fmts.toScript(merged) :
@@ -130,6 +133,7 @@ export default class VisBug extends HTMLElement {
 
   setup() {
     this.$shadow.innerHTML = this.render()
+    this.bindTutorialImageFallbacks()
 
     this.hasAttribute('color-mode')
       ? this.getAttribute('color-mode')
@@ -246,7 +250,7 @@ export default class VisBug extends HTMLElement {
     return `
       <aside ${tool}>
         <figure>
-          <img src="${this._tutsBaseURL}/${tool}.gif" alt="${description}" />
+          ${this.tutorialImage({ tool, description })}
           <figcaption>
             <h2>
               ${label}
@@ -258,6 +262,19 @@ export default class VisBug extends HTMLElement {
         </figure>
       </aside>
     `
+  }
+
+  tutorialImage({ tool, description }) {
+    return `<img data-tut-image src="${this._tutsBaseURL}/${tool}.gif" alt="${description}" />`
+  }
+
+  bindTutorialImageFallbacks() {
+    this.$shadow.querySelectorAll('img[data-tut-image]')
+      .forEach(img =>
+        img.addEventListener('error', () => {
+          img.closest('figure')?.setAttribute('data-tut-missing', 'true')
+          img.hidden = true
+        }, { once: true }))
   }
 
   move() {

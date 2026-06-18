@@ -9,7 +9,10 @@
 > - **edit-log 데모** — `pnpm run demo:edit-log` → http://localhost:3000/edit-log-demo.html (monorepo: `make visbug-demo`)
 > - **pnpm workspace**: qa-sdk `vendor/projectvisbug` — 패키지명 `visbug`, `visbug-bridge`가 `workspace:*`로 소비
 > - **신규: `<edit-log-panel>` UI** — Cmd+Shift+L (또는 Ctrl+Shift+L) 토글. CSS / Script / JSON 형식 클립보드 복사.
-> - **Out of scope**: Chrome/Firefox/Safari/Edge extension builds, Xcode VisBug app — 후속 작업 예정
+> - **edit-log v1.2** — mutation noise filter (`target-filter`, empty diff skip, feature correlation suppress). `getHistory({ merge: 'intent' })`. `mutationCapture: 'all'` for debug.
+> - **DomRef (D1-D3)** — `app/dom-ref/`: `buildDomRefCatalog`, `resolveDomRef`, `queryTargets`; edit-log target catalog + host API. 로드맵: `docs/specs/visbug-bridge/visbug-dom-ref-roadmap.md`
+> - **Extension build** — `pnpm run extension:build` (monorepo: `make visbug-ext`). Chrome/Firefox/Edge MV3 — load unpacked `extension/`. Safari Xcode — 후속.
+> - **Out of scope**: Safari Xcode release pipeline — 후속 작업 예정
 > - Upstream 환원 의도 없음 (사적 변경)
 
 ---

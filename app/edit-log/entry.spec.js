@@ -95,6 +95,50 @@ describe('createEntry', () => {
     expect(entry.correlationId).toBeDefined()
   })
 
+  it('adds DomRef catalog and primary symbol while keeping legacy fields', () => {
+    document.body.innerHTML = '<section data-testid="hero"><p id="t">hello</p></section>'
+    const target = document.getElementById('t')
+    const entry = createEntry({
+      target,
+      feature: 'padding',
+      args: { side: 'top', delta: 1 },
+      beforeCSS: { 'padding-top': '0px' },
+      afterCSS: { 'padding-top': '1px' },
+      source: 'feature',
+      ts: 1700000000000,
+    })
+
+    expect(entry.target.catalog.canonical.kind).toBe('xpath')
+    expect(entry.target.catalog.canonical.value).toMatch(/^\/html\[1\]\//)
+    expect(entry.target.primary.kind).toBe('id')
+    expect(entry.target.selector).toBe(entry.target.primary.value)
+    expect(entry.target.nodePath).toMatch(/p/)
+  })
+
+  it('passes target through DomRef symbol resolver during capture', () => {
+    document.body.innerHTML = '<section data-testid="hero"><p id="t">hello</p></section>'
+    const target = document.getElementById('t')
+    const entry = createEntry({
+      target,
+      feature: 'padding',
+      args: {},
+      beforeCSS: {},
+      afterCSS: { color: 'red' },
+      source: 'feature',
+      ts: 1700000000000,
+      resolveDomRefSymbols: () => [
+        { kind: 'rlsc', value: 'rlsc-node:123', provenance: 'rlsc.locateElement' },
+      ],
+    })
+
+    expect(entry.target.catalog.symbols).toContainEqual(expect.objectContaining({
+      kind: 'rlsc',
+      value: 'rlsc-node:123',
+      matchCount: 1,
+      stability: 90,
+    }))
+  })
+
   it('includes beforeDOM/afterDOM for text edits', () => {
     document.body.innerHTML = '<p id="t">hi</p>'
     const target = document.getElementById('t')

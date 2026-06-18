@@ -9,11 +9,32 @@ function changedPropsOf(entry) {
   return out
 }
 
+const CSS_SYMBOL_KINDS = new Set(['css', 'id', 'attr'])
+
+function cssSelectorOf(entry) {
+  const target = entry?.target
+  const primary = target?.primary
+  if (primary && CSS_SYMBOL_KINDS.has(primary.kind) && primary.value) {
+    return primary.value
+  }
+
+  const symbol = target?.catalog?.symbols?.find((s) =>
+    CSS_SYMBOL_KINDS.has(s.kind) && s.value && (s.matchCount === 1 || s.matchCount == null)
+  )
+  if (symbol) return symbol.value
+
+  const legacy = target?.selector
+  if (typeof legacy === 'string' && legacy && !legacy.startsWith('/')) {
+    return legacy
+  }
+  return ''
+}
+
 export function toCSS(entries, { onWarn = console.warn } = {}) {
   const bySelector = new Map()
   for (const entry of entries) {
     try {
-      const sel = entry?.target?.selector
+      const sel = cssSelectorOf(entry)
       if (!sel) continue
       const props = changedPropsOf(entry)
       if (Object.keys(props).length === 0) continue

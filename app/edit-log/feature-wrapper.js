@@ -1,6 +1,16 @@
 import { createEntry, snapshotComputedStyle, snapshotSwapPair } from './entry.js'
 
-export function wrapFeature({ featureName, original, dispatcher, resolveTarget, props, snapshotDOM, onWarn = console.warn }) {
+export function wrapFeature({
+  featureName,
+  original,
+  dispatcher,
+  resolveTarget,
+  props,
+  snapshotDOM,
+  domRefRoot,
+  resolveDomRefSymbols,
+  onWarn = console.warn,
+}) {
   return function wrapped(...args) {
     let target = null
     let beforeCSS = {}
@@ -32,6 +42,8 @@ export function wrapFeature({ featureName, original, dispatcher, resolveTarget, 
         afterDOM,
         source: 'feature',
         ts: Date.now(),
+        domRefRoot,
+        resolveDomRefSymbols,
       })
       dispatcher.push(entry)
     } catch (err) {

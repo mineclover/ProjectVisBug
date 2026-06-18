@@ -1,0 +1,7 @@
+export { computeFullXPath, resolveFullXPath } from './xpath.js'
+export { countCssMatches, countXPathMatches } from './match-count.js'
+export { computeLegacyNodePath } from './legacy-node-path.js'
+export { collectSymbolCandidates, pickPrimarySymbol } from './symbols.js'
+export { buildDomRefCatalog } from './catalog.js'
+export { resolveDomRef, resolveSymbol, queryTargets } from './resolve.js'
+export { createTargetRegistry } from './target-registry.js'

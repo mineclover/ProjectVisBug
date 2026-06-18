@@ -1,3 +1,5 @@
+import { buildDomRefCatalog } from '../dom-ref/index.js'
+
 const BUCKET_MS = 100
 
 let _entrySeq = 0
@@ -77,12 +79,35 @@ export function computeCorrelationId(nodePath, changedProps, ts) {
   return `${nodePath}|${propKey}|${bucket}`
 }
 
-export function createEntry({ target, feature, args, beforeCSS, afterCSS, beforeDOM, afterDOM, source, ts }) {
+export function createEntry({
+  target,
+  feature,
+  args,
+  beforeCSS,
+  afterCSS,
+  beforeDOM,
+  afterDOM,
+  source,
+  ts,
+  domRefRoot,
+  targetRegistry,
+  domRefSymbols,
+  resolveDomRefSymbols,
+}) {
   const nodePath = computeNodePath(target)
+  const catalog = target
+    ? (targetRegistry?.register?.(target, { symbols: domRefSymbols }) ?? buildDomRefCatalog(target, {
+      root: domRefRoot,
+      symbols: domRefSymbols,
+      resolveSymbols: resolveDomRefSymbols,
+    }))
+    : null
+  const primary = catalog?.primary ?? null
   const cssChanged = diffSnapshots(beforeCSS || {}, afterCSS || {})
   const domChanged = diffDomSnapshots(beforeDOM, afterDOM)
   const changedProps = [...cssChanged, ...domChanged]
-  const correlationId = computeCorrelationId(nodePath, changedProps, ts)
+  const identityPath = catalog?.canonical?.value ?? nodePath
+  const correlationId = computeCorrelationId(identityPath, changedProps, ts)
   const id = `e_${ts}_${++_entrySeq}`
   const entry = {
     id,
@@ -90,8 +115,10 @@ export function createEntry({ target, feature, args, beforeCSS, afterCSS, before
     feature,
     args,
     target: Object.freeze({
-      selector: target?.id ? `#${target.id}` : nodePath,
+      selector: primary?.value ?? (target?.id ? `#${target.id}` : nodePath),
       nodePath,
+      ...(catalog ? { catalog } : {}),
+      ...(primary ? { primary: Object.freeze({ ...primary }) } : {}),
       weakRef: target ? new WeakRef(target) : null,
     }),
     beforeCSS: Object.freeze({ ...(beforeCSS || {}) }),

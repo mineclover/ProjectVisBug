@@ -2,6 +2,7 @@ import $ from 'blingblingjs'
 import { HandleStyles } from '../styles.store'
 import { clamp } from '../../utilities/numbers'
 import { isFixed } from '../../utilities/'
+import { muteMutations, unmuteMutations } from '../../edit-log/mutation-mute.js'
 
 /** border-box 기준 최소 시각 크기 (px) */
 export const MIN_RESIZE_SIZE = 8
@@ -397,6 +398,7 @@ export class Handle extends HTMLElement {
     sourceEl.style.transition = 'none'
     document.body.style.cursor = getComputedStyle(this).getPropertyValue('--cursor')
     document.body.style.userSelect = 'none'
+    muteMutations()
 
     document.addEventListener('pointermove', on_element_resize_move)
 
@@ -438,6 +440,7 @@ export class Handle extends HTMLElement {
       document.body.style.cursor = originalDocumentCursor
       document.body.style.userSelect = originalDocumentUserSelect
       sourceEl.style.transition = originalElTransition
+      unmuteMutations()
       syncHandles(handlesEl, sourceEl, nodeLabelId)
     }
   }
