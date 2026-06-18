@@ -2,7 +2,7 @@
 >
 > 이 fork는 qa-sdk 모노레포의 측정 도구 평가를 위해 모더나이즈됨.
 > - Build: rollup 4 / postcss 8
-> - Tests: @playwright/test (e2e feature + edit-log integration), vitest (unit edit-log/panel/feature-wrap 54/54)
+> - Tests: @playwright/test (e2e feature + edit-log integration), vitest (unit edit-log/DomRef/panel/feature-wrap/selection 105/105)
 > - Node: 20+
 > - **edit-log capture API** — `<vis-bug>` 인스턴스가 사용자 편집을 `EditLogEntry`로 기록 (`beforeCSS`/`afterCSS` + optional `beforeDOM`/`afterDOM`). `editlog` CustomEvent / `onEditLog` setter / `editLogStream()` AsyncIterable. `getHistory({merge})` / `clearHistory()` / `replay(entry, {mode:'css'|'feature'|'dom'})`. 상세: monorepo `docs/specs/visbug-bridge/visbug-edit-log.spec.md`
 > - **feature-wrapper** — `feature-bind.js` + `bindFeatureCall()`로 visbug feature export 직접 wrap (`source:'feature'`). text는 `dom-bind`, move drag는 `swapElements` sibling snapshot.
@@ -10,8 +10,8 @@
 > - **pnpm workspace**: qa-sdk `vendor/projectvisbug` — 패키지명 `visbug`, `visbug-bridge`가 `workspace:*`로 소비
 > - **신규: `<edit-log-panel>` UI** — Cmd+Shift+L (또는 Ctrl+Shift+L) 토글. CSS / Script / JSON 형식 클립보드 복사.
 > - **edit-log v1.2** — mutation noise filter (`target-filter`, empty diff skip, feature correlation suppress). `getHistory({ merge: 'intent' })`. `mutationCapture: 'all'` for debug.
-> - **DomRef (D1-D3)** — `app/dom-ref/`: `buildDomRefCatalog`, `resolveDomRef`, `queryTargets`; edit-log target catalog + host API. 로드맵: `docs/specs/visbug-bridge/visbug-dom-ref-roadmap.md`
-> - **Extension build** — `pnpm run extension:build` (monorepo: `make visbug-ext`). Chrome/Firefox/Edge MV3 — load unpacked `extension/`. Safari Xcode — 후속.
+> - **DomRef (D1-D6)** — `app/dom-ref/`: `buildDomRefCatalog`, `resolveDomRef`, `queryTargets`, `TargetRegistry`; edit-log target catalog + host API + 외부 `rlsc`/`qa-coord` symbol 주입. 로드맵: monorepo `docs/specs/visbug-bridge/visbug-dom-ref-roadmap.md`
+> - **Extension build** — `pnpm run extension:build` (monorepo: `make visbug-ext`). Chrome/Firefox/Edge MV3 — load unpacked `extension/`. Tutorial GIFs are copied from `app/tuts` to `extension/tuts`. Safari Xcode — 후속.
 > - **Out of scope**: Safari Xcode release pipeline — 후속 작업 예정
 > - Upstream 환원 의도 없음 (사적 변경)
 

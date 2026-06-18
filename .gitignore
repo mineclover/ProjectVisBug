@@ -4,6 +4,7 @@ node_modules/
 app/bundle.js
 app/bundle.min.js
 app/bundle.css
+app/edit-log-demo.bundle.css
 extension/toolbar/bundle.min.js
 extension/toolbar/bundle.css
 extension/build
