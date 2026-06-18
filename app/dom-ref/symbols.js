@@ -5,11 +5,13 @@ import { countCssMatches } from './match-count.js'
 const STABLE_ATTRS = [
   'data-testid',
   'data-qa-id',
+  'data-qa-address',
   'data-demo-target',
   'data-test-id',
 ]
 
-const DYNAMIC_ID = /^(?:[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}|:r[0-9]+:|react-select)/i
+const DYNAMIC_ID = /^(?:[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}|:r[0-9]+:|react-select|headlessui-|radix-)/i
+const REACT_GENERATED_ID_TOKEN = /:r[0-9]+:/i
 
 /**
  * @typedef {object} DomRefSymbol
@@ -30,15 +32,21 @@ function escapeAttrValue(val) {
   return String(val).replace(/\\/g, '\\\\').replace(/"/g, '\\"')
 }
 
+function isDynamicId(id) {
+  return !id || DYNAMIC_ID.test(id) || REACT_GENERATED_ID_TOKEN.test(id)
+}
+
 /**
  * @param {Element} el
+ * @param {Document | Element} root
  */
-function buildShortCssPath(el) {
+function buildShortCssPath(el, root = document) {
   const parts = []
   let cur = el
-  while (cur && cur.nodeType === 1 && cur !== document.documentElement) {
+  const boundary = root.nodeType === 1 ? root : document.documentElement
+  while (cur && cur.nodeType === 1 && cur !== boundary && cur !== document.documentElement) {
     let part = cur.tagName.toLowerCase()
-    if (cur.id) {
+    if (cur.id && !isDynamicId(cur.id)) {
       part = `#${escapeCssIdent(cur.id)}`
       parts.unshift(part)
       break
@@ -66,7 +74,7 @@ function buildShortCssPath(el) {
  * @param {string} id
  */
 function idStability(id) {
-  if (!id || DYNAMIC_ID.test(id)) return 55
+  if (isDynamicId(id)) return 55
   return 85
 }
 
@@ -129,7 +137,7 @@ export function collectSymbolCandidates(element, root = document) {
     })
   }
 
-  const cssPath = buildShortCssPath(element)
+  const cssPath = buildShortCssPath(element, root)
   if (cssPath) {
     const matchCount = countCssMatches(cssPath, root)
     push({

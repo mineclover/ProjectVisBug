@@ -31,6 +31,8 @@
     "extension:chrome": "npm run extension:build",
     "extension:firefox": "npm run extension:build",
     "extension:edge": "npm run extension:build",
+    "safari:archive:unsigned": "sh scripts/safari-archive-unsigned.sh",
+    "safari:notarize": "sh scripts/safari-notarize.sh",
     "demo:edit-log": "npm run bundle && browser-sync start --server \"app\" --startPath \"edit-log-demo.html\" --files \"app/edit-log-demo.bundle.css,app/bundle.js,app/edit-log-demo.html,app/demo.css,app/edit-log-demo.js\" --no-open --no-notify --no-ui --no-ghost-mode",
     "dev:js": "rollup -c -w --environment build:dev",
     "dev:css": "postcss app/index.css -o app/bundle.css -w",

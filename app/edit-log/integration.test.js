@@ -18,7 +18,8 @@ test('padding edit records feature entry with args', async ({ visbugPage }) => {
 })
 
 test('padding edit suppresses redundant mutation when feature is captured', async ({ visbugPage }) => {
-  const history = await historyAfterEdit(visbugPage, 'padding')
+  await historyAfterEdit(visbugPage, 'padding')
+  const history = await visbugPage.$eval('vis-bug', (el) => el.getHistory({ filter: 'feature' }))
   const sources = history.map((e) => e.source)
   expect(sources).toContain('feature')
   expect(sources).not.toContain('mutation')
