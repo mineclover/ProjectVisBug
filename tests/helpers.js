@@ -8,9 +8,11 @@ import { test as base, expect } from '@playwright/test'
 /** @type {ReturnType<typeof base.extend<VisBugFixtures>>} */
 export const test = base.extend({
   visbugPage: async ({ page }, use) => {
-    await page.goto('/')
+    // The demo references third-party fonts/analytics that may never finish
+    // loading in CI. DOM content is sufficient for the bundled custom element.
+    await page.goto('/', { waitUntil: 'domcontentloaded' })
     await page.evaluate(() => document.body.setAttribute('testing', 'true'))
-    await page.waitForSelector('vis-bug')
+    await page.waitForSelector('vis-bug', { state: 'attached' })
     await use(page)
   },
 })
