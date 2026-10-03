@@ -154,3 +154,22 @@ test('clearHistory empties buffer', async ({ visbugPage }) => {
   const count = await visbugPage.$eval('vis-bug', (el) => el.getHistory().length)
   expect(count).toBe(0)
 })
+
+test('buffer-size attribute limits the connected VisBug edit-log history', async ({ visbugPage }) => {
+  await visbugPage.evaluate(() => {
+    document.querySelector('vis-bug')?.remove()
+    const limited = document.createElement('vis-bug')
+    limited.setAttribute('buffer-size', '2')
+    document.body.append(limited)
+  })
+
+  await changeMode({ tool: 'padding', page: visbugPage })
+  await visbugPage.click('[intro] b')
+  await visbugPage.keyboard.press('ArrowUp')
+  await visbugPage.keyboard.press('ArrowUp')
+  await visbugPage.keyboard.press('ArrowUp')
+  await visbugPage.waitForTimeout(100)
+
+  const history = await visbugPage.$eval('vis-bug', (el) => el.getHistory())
+  expect(history.length).toBe(2)
+})

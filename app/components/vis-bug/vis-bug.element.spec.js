@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest'
 
-import VisBug from './vis-bug.element.js'
+import VisBug, { DEFAULT_EDIT_LOG_BUFFER_SIZE } from './vis-bug.element.js'
+
+function createVisBugLike(overrides = {}) {
+  const host = document.createElement('div')
+  return Object.assign(Object.create(VisBug.prototype), {
+    _bufferSize: DEFAULT_EDIT_LOG_BUFFER_SIZE,
+    getAttribute: host.getAttribute.bind(host),
+    setAttribute: host.setAttribute.bind(host),
+    ...overrides,
+  })
+}
 
 function renderDemoTip(overrides = {}) {
   const visbug = Object.assign(Object.create(VisBug.prototype), {
@@ -36,5 +46,34 @@ describe('VisBug tutorial images', () => {
     expect(host.querySelector('figure').getAttribute('data-tut-missing')).toBe('true')
     expect(host.querySelector('img').hidden).toBe(true)
     expect(host.querySelector('figcaption').textContent).toContain('Guides')
+  })
+})
+
+describe('VisBug edit-log buffer configuration', () => {
+  it('keeps the historical default when no value is provided', () => {
+    const visbug = createVisBugLike()
+
+    expect(visbug.bufferSize).toBe(1000)
+    expect(visbug.configuredBufferSize).toBe(1000)
+  })
+
+  it('accepts a positive integer property before connection', () => {
+    const visbug = createVisBugLike()
+
+    visbug.bufferSize = 250
+
+    expect(visbug.bufferSize).toBe(250)
+    expect(visbug.configuredBufferSize).toBe(250)
+  })
+
+  it('falls back for invalid values and supports the custom-element attribute', () => {
+    const visbug = createVisBugLike()
+    visbug.bufferSize = 250
+
+    visbug.setAttribute('buffer-size', '0')
+    expect(visbug.configuredBufferSize).toBe(250)
+
+    visbug.setAttribute('buffer-size', '64')
+    expect(visbug.configuredBufferSize).toBe(64)
   })
 })

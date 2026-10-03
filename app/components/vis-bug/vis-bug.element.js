@@ -34,11 +34,20 @@ import { setFeatureWrapper, clearFeatureBindings } from '../../edit-log/feature-
 import { clearDomBindings } from '../../edit-log/dom-bind.js'
 import '../edit-log-panel/edit-log-panel.element.js'
 
+export const DEFAULT_EDIT_LOG_BUFFER_SIZE = 1000
+
+function normalizeEditLogBufferSize(value, fallback = DEFAULT_EDIT_LOG_BUFFER_SIZE) {
+  if (typeof value === 'string' && value.trim() === '') return fallback
+  const size = Number(value)
+  return Number.isInteger(size) && size > 0 ? size : fallback
+}
+
 export default class VisBug extends HTMLElement {
   constructor() {
     super()
 
     this.toolbar_model  = VisBugModel
+    this._bufferSize    = DEFAULT_EDIT_LOG_BUFFER_SIZE
     this.$shadow        = this.attachShadow({mode: 'closed'})
     this.applyScheme    = schemeRule(
       this.$shadow,
@@ -50,9 +59,31 @@ export default class VisBug extends HTMLElement {
     return ['color-scheme']
   }
 
+  /**
+   * Maximum number of edit-log entries retained by this element.
+   *
+   * The property is intentionally settable before the element is attached so
+   * bridge clients can pass a numeric option without relying on an HTML
+   * attribute string. Invalid values preserve the historical default.
+   */
+  get bufferSize() {
+    return this._bufferSize ?? DEFAULT_EDIT_LOG_BUFFER_SIZE
+  }
+
+  set bufferSize(value) {
+    this._bufferSize = normalizeEditLogBufferSize(value)
+  }
+
+  get configuredBufferSize() {
+    // Support both the kebab-case custom-element spelling and the camel-case
+    // spelling used by the original bridge option.
+    const attrValue = this.getAttribute('buffer-size') ?? this.getAttribute('bufferSize')
+    return normalizeEditLogBufferSize(attrValue, this.bufferSize)
+  }
+
   connectedCallback() {
     this._editLog = installEditLog(this, {
-      bufferSize: 1000,
+      bufferSize: this.configuredBufferSize,
       contentRoot: this.parentElement ?? document.body,
       mutationScope: 'page-edits',
       resolveDomRefSymbols: this.resolveDomRefSymbols,
