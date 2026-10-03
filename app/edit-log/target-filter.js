@@ -26,6 +26,7 @@ export function isVisbugChrome(node) {
   while (cur && cur.nodeType === 1) {
     const tag = cur.tagName
     if (VISBUG_CHROME_TAGS.has(tag)) return true
+    if (cur.hasAttribute?.('data-visbug-ignore')) return true
     if (cur.classList?.contains('visbug-metatip')) return true
     cur = cur.parentNode
   }

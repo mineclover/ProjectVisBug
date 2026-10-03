@@ -42,7 +42,7 @@ export function createMutationWatcher({
   onWarn = console.warn,
 }) {
   let observer = null
-  const beforeCache = new WeakMap()
+  let beforeCache = new WeakMap()
 
   const featureFor = () => {
     try {
@@ -125,6 +125,9 @@ export function createMutationWatcher({
     stop() {
       observer?.disconnect()
       observer = null
+    },
+    reset() {
+      beforeCache = new WeakMap()
     },
   }
 }

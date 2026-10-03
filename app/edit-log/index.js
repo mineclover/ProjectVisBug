@@ -79,6 +79,7 @@ export function installEditLog(host, opts = {}) {
 
   host.muteEditLogMutations = () => muteMutations()
   host.unmuteEditLogMutations = () => unmuteMutations()
+  host.resetEditLogTracking = () => watcher.reset()
   host.targetRegistry = targetRegistry
   host.buildTargetRef = (element, registryOpts = {}) =>
     targetRegistry.register(element, registryOpts)
@@ -151,6 +152,7 @@ export function installEditLog(host, opts = {}) {
       dispatcher.clear()
       delete host.muteEditLogMutations
       delete host.unmuteEditLogMutations
+      delete host.resetEditLogTracking
       delete host.buildTargetRef
       delete host.getTargetRefByLabelId
       delete host.getTargetRefByElement

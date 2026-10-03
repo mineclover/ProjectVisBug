@@ -80,7 +80,8 @@ export const htmlStringToDom = (htmlString = "") =>
 
 export const isOffBounds = node =>
   node.closest && (
-       node.closest('vis-bug')
+       node.closest('[data-visbug-ignore]')
+    || node.closest('vis-bug')
     || node.closest('hotkey-map')
     || node.closest('visbug-metatip')
     || node.closest('visbug-ally')

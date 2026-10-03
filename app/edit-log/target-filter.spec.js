@@ -28,6 +28,16 @@ describe('isVisbugChrome', () => {
     expect(isVisbugChrome(el)).toBe(false)
     el.remove()
   })
+
+  it('returns true for an explicitly ignored control region', () => {
+    const panel = document.createElement('aside')
+    panel.setAttribute('data-visbug-ignore', '')
+    const button = document.createElement('button')
+    panel.appendChild(button)
+    document.body.appendChild(panel)
+    expect(isVisbugChrome(button)).toBe(true)
+    panel.remove()
+  })
 })
 
 describe('isMutationCaptureTarget', () => {
@@ -57,6 +67,18 @@ describe('isMutationCaptureTarget', () => {
     expect(isMutationCaptureTarget(outside, { scope: 'content-root', contentRoot: root })).toBe(false)
     root.remove()
     outside.remove()
+  })
+
+  it('rejects ignored control regions even in content-root scope', () => {
+    const root = document.createElement('main')
+    const panel = document.createElement('aside')
+    panel.setAttribute('data-visbug-ignore', '')
+    const button = document.createElement('button')
+    panel.appendChild(button)
+    root.appendChild(panel)
+    document.body.appendChild(root)
+    expect(isMutationCaptureTarget(button, { scope: 'content-root', contentRoot: root })).toBe(false)
+    root.remove()
   })
 })
 
