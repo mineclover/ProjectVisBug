@@ -1,3 +1,5 @@
+import { CORRELATION_WINDOW_MS } from './entry.js'
+
 const DEFAULT_MAX = 1000
 const FEATURE_CORRELATION_TTL_MS = 10_000
 
@@ -43,9 +45,11 @@ export function createDispatcher({ maxSize = DEFAULT_MAX, onWarn = console.warn 
       buffer.length = 0
       featureCorrelations.clear()
     },
-    hasFeatureCorrelation(correlationId) {
-      pruneFeatureCorrelations()
-      return featureCorrelations.has(correlationId)
+    hasFeatureCorrelation(correlationId, now = Date.now()) {
+      pruneFeatureCorrelations(now)
+      const featureTs = featureCorrelations.get(correlationId)
+      if (featureTs == null) return false
+      return now >= featureTs && now - featureTs <= CORRELATION_WINDOW_MS
     },
     subscribe(cb) {
       listeners.add(cb)

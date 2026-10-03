@@ -1,6 +1,12 @@
 import { buildDomRefCatalog } from '../dom-ref/index.js'
 
-const BUCKET_MS = 100
+/**
+ * Correlation entries are created by two independent observers: feature
+ * wrappers run synchronously while MutationObserver callbacks run at the end
+ * of the microtask checkpoint. Keep the bucket small, but expose the window
+ * so the watcher can tolerate a callback crossing one bucket boundary.
+ */
+export const CORRELATION_WINDOW_MS = 100
 
 let _entrySeq = 0
 
@@ -74,9 +80,29 @@ export function diffDomSnapshots(before, after) {
 }
 
 export function computeCorrelationId(nodePath, changedProps, ts) {
-  const bucket = Math.floor(ts / BUCKET_MS)
+  const bucket = Math.floor(ts / CORRELATION_WINDOW_MS)
   const propKey = [...changedProps].sort().join(',')
   return `${nodePath}|${propKey}|${bucket}`
+}
+
+/**
+ * Return the exact bucket and its immediate neighbours for a correlation ID.
+ * The timestamp check remains the source of truth in the dispatcher; these
+ * candidates only make an observer callback that crossed a bucket boundary
+ * eligible for that check.
+ */
+export function correlationIdCandidates(correlationId, ts) {
+  if (typeof correlationId !== 'string') return []
+  const separator = correlationId.lastIndexOf('|')
+  if (separator < 0) return [correlationId]
+
+  const base = correlationId.slice(0, separator)
+  const bucket = Number(correlationId.slice(separator + 1))
+  if (!Number.isInteger(bucket)) return [correlationId]
+
+  const currentBucket = Math.floor(ts / CORRELATION_WINDOW_MS)
+  const buckets = new Set([bucket, currentBucket - 1, currentBucket, currentBucket + 1])
+  return [...buckets].map((candidate) => `${base}|${candidate}`)
 }
 
 export function createEntry({

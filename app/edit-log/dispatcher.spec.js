@@ -67,4 +67,11 @@ describe('createDispatcher', () => {
     d.clear()
     expect(d.getAll()).toEqual([])
   })
+
+  it('requires a feature correlation to be within the capture window', () => {
+    const d = createDispatcher()
+    d.push({ id: 'feature', ts: 1_000, source: 'feature', correlationId: 'p|x|10' })
+    expect(d.hasFeatureCorrelation('p|x|10', 1_100)).toBe(true)
+    expect(d.hasFeatureCorrelation('p|x|10', 1_101)).toBe(false)
+  })
 })

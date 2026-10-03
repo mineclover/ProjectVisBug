@@ -7,6 +7,7 @@ import {
   snapshotTextContent,
   snapshotSwapPair,
   computeCorrelationId,
+  correlationIdCandidates,
   createEntry,
 } from './entry.js'
 
@@ -71,6 +72,13 @@ describe('computeCorrelationId', () => {
     const id1 = computeCorrelationId('p', ['padding-top'], 1700000000000)
     const id2 = computeCorrelationId('p', ['margin-top'], 1700000000000)
     expect(id1).not.toBe(id2)
+  })
+
+  it('offers adjacent buckets for observer callbacks crossing a boundary', () => {
+    const featureId = computeCorrelationId('p', ['padding-top'], 1700000000099)
+    const candidates = correlationIdCandidates(featureId, 1700000000100)
+    expect(candidates).toContain(featureId)
+    expect(candidates).toContain(computeCorrelationId('p', ['padding-top'], 1700000000100))
   })
 })
 

@@ -1,4 +1,9 @@
-import { createEntry, snapshotComputedStyle, diffSnapshots } from './entry.js'
+import {
+  createEntry,
+  snapshotComputedStyle,
+  diffSnapshots,
+  correlationIdCandidates,
+} from './entry.js'
 import { isMutationCaptureTarget } from './target-filter.js'
 import { mutationsMuted } from './mutation-mute.js'
 
@@ -89,10 +94,9 @@ export function createMutationWatcher({
           resolveDomRefSymbols,
         })
 
-        if (
-          captureMode === 'filtered'
-          && dispatcher.hasFeatureCorrelation(entry.correlationId)
-        ) {
+        const hasFeatureCorrelation = correlationIdCandidates(entry.correlationId, entry.ts)
+          .some((correlationId) => dispatcher.hasFeatureCorrelation(correlationId, entry.ts))
+        if (captureMode === 'filtered' && hasFeatureCorrelation) {
           beforeCache.set(target, after)
           continue
         }

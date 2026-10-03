@@ -138,4 +138,32 @@ describe('createMutationWatcher', () => {
     expect(dispatcher.getAll().filter((e) => e.source === 'mutation')).toHaveLength(0)
     expect(dispatcher.getAll().filter((e) => e.source === 'feature')).toHaveLength(1)
   })
+
+  it('suppresses a mutation when the callback crosses a correlation bucket boundary', async () => {
+    watcher = createMutationWatcher({ root: document.body, dispatcher, captureMode: 'filtered' })
+    watcher.start()
+    const el = document.getElementById('x')
+    el.style.paddingTop = '0px'
+    await flush()
+    dispatcher.clear()
+
+    dispatcher.push(createEntry({
+      target: el,
+      feature: 'padding',
+      args: ['up'],
+      beforeCSS: { 'padding-top': '0px' },
+      afterCSS: { 'padding-top': '4px' },
+      source: 'feature',
+      // Deliberately place the feature at the end of a bucket. The mutation
+      // observer callback is timestamped in the next bucket below.
+      ts: 1700000000099,
+    }))
+    const now = vi.spyOn(Date, 'now').mockReturnValue(1700000000100)
+    el.style.paddingTop = '4px'
+    await flush()
+    now.mockRestore()
+
+    expect(dispatcher.getAll().filter((e) => e.source === 'mutation')).toHaveLength(0)
+    expect(dispatcher.getAll().filter((e) => e.source === 'feature')).toHaveLength(1)
+  })
 })
