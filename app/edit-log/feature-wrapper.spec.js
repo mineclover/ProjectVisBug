@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { wrapFeature } from './feature-wrapper.js'
 import { createDispatcher } from './dispatcher.js'
+import { createTargetRegistry } from '../dom-ref/target-registry.js'
 
 describe('wrapFeature', () => {
   let dispatcher
@@ -31,6 +32,27 @@ describe('wrapFeature', () => {
     expect(entries[0].feature).toBe('padding')
     expect(entries[0].source).toBe('feature')
     expect(entries[0].afterCSS['padding-top']).toBe('4px')
+  })
+
+  it('reuses the supplied target registry catalog for feature entries', () => {
+    const target = document.getElementById('x')
+    const targetRegistry = createTargetRegistry({ root: document.body })
+    const catalog = targetRegistry.register(target)
+    const wrapped = wrapFeature({
+      featureName: 'padding',
+      original: (node, val) => { node.style.paddingTop = val },
+      dispatcher,
+      resolveTarget: (args) => args[0],
+      props: ['padding-top'],
+      domRefRoot: document.body,
+      targetRegistry,
+    })
+
+    wrapped(target, '4px')
+
+    const [entry] = dispatcher.getAll()
+    expect(entry.target.catalog).toBe(catalog)
+    expect(targetRegistry.getByElement(target)).toBe(catalog)
   })
 
   it('rethrows when original throws and does not push', () => {

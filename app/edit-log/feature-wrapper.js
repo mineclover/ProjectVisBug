@@ -8,6 +8,7 @@ export function wrapFeature({
   props,
   snapshotDOM,
   domRefRoot,
+  targetRegistry,
   resolveDomRefSymbols,
   onWarn = console.warn,
 }) {
@@ -43,6 +44,7 @@ export function wrapFeature({
         source: 'feature',
         ts: Date.now(),
         domRefRoot,
+        targetRegistry,
         resolveDomRefSymbols,
       })
       dispatcher.push(entry)
